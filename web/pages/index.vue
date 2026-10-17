@@ -15,7 +15,7 @@
     <QuakeStats class="mt-5" />
 
     <div class="mt-6 grid gap-6 lg:grid-cols-12">
-      <section class="lg:col-span-6 xl:col-span-5" aria-labelledby="feed-title">
+      <section class="order-2 lg:order-none lg:col-span-6 xl:col-span-5" aria-labelledby="feed-title">
         <h2 id="feed-title" class="sr-only">Event feed</h2>
         <div class="overflow-hidden rounded-lg border border-glass">
           <template v-if="latest">
@@ -31,7 +31,7 @@
               No events match these filters in the {{ WINDOWS[win].label.toLowerCase() }}.
             </p>
             <div v-if="filtered.length > limit" class="p-4 text-center">
-              <BaseButton variant="ghost" @click="limit += 100">Show more ({{ filtered.length - limit }} left)</BaseButton>
+              <BaseButton variant="ghost" @click="limit += step">Show more ({{ filtered.length - limit }} left)</BaseButton>
             </div>
           </template>
           <div v-else class="space-y-px" aria-hidden="true">
@@ -40,7 +40,8 @@
         </div>
       </section>
 
-      <aside class="space-y-6 lg:col-span-6 xl:col-span-7">
+      <!-- On phones the map comes first, so it is not below a long list. -->
+      <aside class="order-1 space-y-6 lg:order-none lg:col-span-6 xl:col-span-7">
         <ClientOnly>
           <QuakeMap class="h-[420px] lg:sticky lg:top-20 lg:h-[calc(100vh-14rem)]" :events="filtered" :selected="selected" @select="select" />
           <template #fallback>
@@ -58,12 +59,28 @@
 
 <script setup lang="ts">
 const { latest, filtered, now, win, selected } = useQuakes();
-const limit = ref(100);
+// Phones get a short list (the map sits above it); wide screens show the
+// list beside a sticky map.
+const wide = ref(false);
+const step = computed(() => (wide.value ? 100 : 15));
+const limit = ref(15);
 const shown = computed(() => filtered.value.slice(0, limit.value));
-watch([filtered], () => (limit.value = 100));
+watch([filtered, step], () => (limit.value = step.value));
+
+let mq: MediaQueryList | undefined;
+const onMedia = (e: MediaQueryListEvent) => (wide.value = e.matches);
+onMounted(() => {
+  mq = window.matchMedia("(min-width: 1024px)");
+  wide.value = mq.matches;
+  mq.addEventListener("change", onMedia);
+});
+onBeforeUnmount(() => mq?.removeEventListener("change", onMedia));
 
 const select = (id: string) => {
   selected.value = id;
+  // A quake picked on the map may be past the end of the short list.
+  const i = filtered.value.findIndex((q) => q.id === id);
+  if (i >= limit.value) limit.value = Math.ceil((i + 1) / step.value) * step.value;
   // Bring the card into view when the selection comes from the map.
   nextTick(() => document.querySelector('[aria-current="true"]')?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
 };
