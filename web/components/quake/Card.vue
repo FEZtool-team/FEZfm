@@ -17,7 +17,7 @@
     </div>
 
     <div class="min-w-0 flex-1">
-      <h3 class="text-[15px] leading-snug text-fez-50">{{ q.place || "Unnamed location" }}</h3>
+      <h3 class="text-[15px] font-medium leading-snug text-fez-50">{{ q.place || "Unnamed location" }}</h3>
       <p class="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-fez-400">
         <time :datetime="q.t" :title="utc(q.t)">{{ ago(q.t, now) }}</time>
         <span>{{ utc(q.t) }}</span>

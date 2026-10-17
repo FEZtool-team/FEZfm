@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-3xl px-gutter py-10">
     <div class="flex items-center gap-3">
       <ToolsToolBadge />
-      <h1 class="text-3xl font-light text-fez-50">Sources and method</h1>
+      <h1 class="text-3xl font-bold text-fez-50">Sources and method</h1>
     </div>
     <p class="paragraph mt-4">
       FEZfm is the fault and geohazard monitoring tool of FEZtool. This first version collects earthquake reports,
@@ -10,7 +10,7 @@
       fault zones in Iran by Fariba Khosravani and Mahdi Farmahini Farahani.
     </p>
 
-    <h2 class="mt-10 text-xl font-light text-fez-100">Sources</h2>
+    <h2 class="mt-10 text-xl font-semibold text-fez-100">Sources</h2>
     <dl class="mt-4 space-y-4 text-sm">
       <div>
         <dt class="text-fez-100">IRSC, Iranian Seismological Center, Institute of Geophysics, University of Tehran</dt>
@@ -32,7 +32,7 @@
       </div>
     </dl>
 
-    <h2 class="mt-10 text-xl font-light text-fez-100">How it works</h2>
+    <h2 class="mt-10 text-xl font-semibold text-fez-100">How it works</h2>
     <ol class="paragraph mt-4 list-decimal space-y-2 pl-5 text-sm">
       <li>Every 30 minutes a GitHub Actions job requests the last two days from each source. Re-reading two days picks up late reports and revised magnitudes.</li>
       <li>Reports are stored in a DuckDB database, one row per source and event.</li>
@@ -44,7 +44,7 @@
       <li>The site, the feed and the download files are rebuilt and published to GitHub Pages.</li>
     </ol>
 
-    <h2 class="mt-10 text-xl font-light text-fez-100">Flags</h2>
+    <h2 class="mt-10 text-xl font-semibold text-fez-100">Flags</h2>
     <dl class="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[10rem_1fr]">
       <dt class="text-fez-100">Significant</dt>
       <dd class="paragraph">M5 or larger anywhere, or M4 or larger in Iran and adjacent areas.</dd>
@@ -54,7 +54,7 @@
       <dd class="paragraph">The epicentre lies inside the buffer of one of the 21 zones Faultiuo monitors (20 km half-width, 40 km for Kopedagh, 50 km for Seimare and Zagros).</dd>
     </dl>
 
-    <h2 class="mt-10 text-xl font-light text-fez-100">Limits</h2>
+    <h2 class="mt-10 text-xl font-semibold text-fez-100">Limits</h2>
     <ul class="paragraph mt-4 list-disc space-y-2 pl-5 text-sm">
       <li>Delay: data are 30 to 45 minutes behind real time, and GitHub can delay scheduled runs further. Use official agencies for warnings.</li>
       <li v-if="latest?.zones_approximate !== false">
@@ -65,7 +65,7 @@
       <li>Magnitudes of different types (ML, mb, Mw) are shown as reported and are not converted.</li>
     </ul>
 
-    <h2 class="mt-10 text-xl font-light text-fez-100">Map data</h2>
+    <h2 class="mt-10 text-xl font-semibold text-fez-100">Map data</h2>
     <p class="paragraph mt-4 text-sm">
       Country outlines from Natural Earth (public domain), drawn on the site itself so the map needs no tile service. Active faults from the GEM Global Active Faults Database
       (CC BY-SA 4.0).

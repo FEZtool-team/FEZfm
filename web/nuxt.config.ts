@@ -67,7 +67,7 @@ export default defineNuxtConfig({
 
   googleFonts: {
     families: {
-      Outfit: [300, 400, 500, 600],
+      Poppins: [300, 400, 500, 600, 700],
     },
     display: "swap",
   },
@@ -77,7 +77,7 @@ export default defineNuxtConfig({
       theme: {
         extend: {
           fontFamily: {
-            sans: ["Outfit", "sans-serif"],
+            sans: ["Poppins", "sans-serif"],
             mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
           },
           colors: {

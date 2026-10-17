@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-7xl px-gutter py-8">
     <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <h1 class="text-3xl font-light text-fez-50 sm:text-4xl">Recent earthquakes</h1>
+        <h1 class="text-3xl font-bold text-fez-50 sm:text-4xl">Recent earthquakes</h1>
         <p class="paragraph mt-2 max-w-2xl text-sm">
           Reports from the Iranian Seismological Center (IRSC), USGS and EMSC, merged into one feed and refreshed every
           30 minutes. All events in Iran and adjacent areas; elsewhere M{{ latest?.world_min_mag ?? 2.5 }} and above.

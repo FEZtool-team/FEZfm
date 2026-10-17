@@ -21,6 +21,7 @@ FEZfm is the FEZtool fault and geohazard monitor. v1 is an earthquake feed plus 
 - **Times.** UTC everywhere. IRSC bulletin times are UTC (verified against EMSC and USGS).
 - **Colors.** Use `fez-*` for site chrome and `fm-*` (FEZfm blue) for monitor data. No raw hex in components; map colors are read from CSS variables (`composables/useTokens.ts`).
 - **Copy.** Follow FEZhome's fez-brand tone: plain, sentence case, no hype.
+- **Type.** Poppins, as in FEZhome. Use `font-bold` for page titles (h1), `font-semibold` for section headings (h2), and `font-medium` for card titles.
 - **Routes.** `public/data/` is reserved for generated files, so do not add a page route named `/data`.
 - **Before committing:**
   - run `uv run pytest -q` in `collector/`;

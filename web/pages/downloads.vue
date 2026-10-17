@@ -1,13 +1,13 @@
 <template>
   <div class="mx-auto max-w-5xl px-gutter py-10">
-    <h1 class="text-3xl font-light text-fez-50">Data</h1>
+    <h1 class="text-3xl font-bold text-fez-50">Data</h1>
     <p class="paragraph mt-3 max-w-2xl text-sm">
       Every file below is rebuilt each time the collector runs (every 30 minutes). Times are UTC. One row is one
       earthquake after merging reports from IRSC, USGS and EMSC.
     </p>
 
     <section class="mt-8" aria-labelledby="files">
-      <h2 id="files" class="text-lg font-light text-fez-100">Event files</h2>
+      <h2 id="files" class="text-lg font-semibold text-fez-100">Event files</h2>
       <div class="mt-3 overflow-x-auto rounded-lg border border-glass">
         <table class="w-full text-left text-sm">
           <thead class="border-b border-glass text-xs text-fez-400">
@@ -42,7 +42,7 @@
       <div class="rounded-lg border border-glass p-5">
         <div class="flex items-center gap-3">
           <ToolsToolBadge size="sm" />
-          <h2 class="text-lg font-light text-fez-100">Full database</h2>
+          <h2 class="text-lg font-semibold text-fez-100">Full database</h2>
         </div>
         <p class="paragraph mt-2 text-sm">
           The complete DuckDB file: raw reports from each source (<code class="text-fez-200">raw_events</code>), merged
@@ -57,7 +57,7 @@ ORDER BY time_utc DESC LIMIT 20;</pre>
       </div>
 
       <div class="rounded-lg border border-glass p-5">
-        <h2 class="text-lg font-light text-fez-100">Feeds and layers</h2>
+        <h2 class="text-lg font-semibold text-fez-100">Feeds and layers</h2>
         <ul class="mt-3 space-y-2.5 text-sm">
           <li>
             <a :href="`${base}data/feed.xml`" class="text-fez-100 underline decoration-fez-600 underline-offset-4 hover:text-fez-50">Atom feed</a>
@@ -80,7 +80,7 @@ ORDER BY time_utc DESC LIMIT 20;</pre>
     </section>
 
     <section class="mt-10" aria-labelledby="columns">
-      <h2 id="columns" class="text-lg font-light text-fez-100">Columns</h2>
+      <h2 id="columns" class="text-lg font-semibold text-fez-100">Columns</h2>
       <dl class="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[12rem_1fr]">
         <template v-for="c in columns" :key="c[0]">
           <dt class="font-mono text-xs leading-6 text-fez-200">{{ c[0] }}</dt>

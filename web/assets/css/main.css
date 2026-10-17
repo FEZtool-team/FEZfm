@@ -189,7 +189,7 @@ input[type="number"] {
 /* Leaflet map: popup, controls and zone labels restyled with the same tokens. */
 .fezfm-map {
   background: rgb(var(--fez-950));
-  font-family: Outfit, sans-serif;
+  font-family: Poppins, sans-serif;
 }
 .fezfm-map .leaflet-popup-content-wrapper {
   background: rgb(var(--fez-800));
