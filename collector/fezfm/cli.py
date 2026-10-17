@@ -21,6 +21,12 @@ def main(argv: list[str] | None = None) -> None:
 
     c = sub.add_parser("collect", help="fetch the last 2 days from every source and rebuild events")
     c.add_argument("--source", action="append", choices=list(pipeline.SOURCE_MODULES), help="limit to a source")
+    c.add_argument(
+        "--snapshot",
+        type=Path,
+        help="first merge this database from another collector (the IRSC runner); "
+        "sources it ran in the last 2 hours are not fetched again",
+    )
 
     b = sub.add_parser("backfill", help="seed history")
     b.add_argument("--days", type=int, default=30)
@@ -44,7 +50,7 @@ def main(argv: list[str] | None = None) -> None:
     con = db.connect(args.db)
     try:
         if args.cmd == "collect":
-            result = pipeline.run(con, args.source)
+            result = pipeline.run(con, args.source, args.snapshot)
         elif args.cmd == "backfill":
             result = pipeline.backfill(con, args.days, args.source)
         else:

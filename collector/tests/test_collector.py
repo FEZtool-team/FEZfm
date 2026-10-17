@@ -157,3 +157,53 @@ def test_backfill_skips_a_source_after_it_fails(con, monkeypatch):
     result = pipeline.backfill(con, days=21, sources=None)
     assert calls == {"down": 1, "up": 3}  # three 7-day windows, "down" tried once
     assert result["windows"][0]["down"]["ok"] is False
+
+
+def _snapshot(path, reports, run_at, ok=True):
+    snap = db.connect(path)
+    db.upsert_reports(snap, reports, run_at)
+    db.log_run(snap, "irsc", run_at, run_at, ok, len(reports), len(reports), None if ok else "ConnectTimeout")
+    snap.close()
+
+
+def test_snapshot_merge_is_idempotent(con, reports, tmp_path):
+    irsc_reports = [r for r in reports if r.source == "irsc"]
+    path = tmp_path / "irsc.duckdb"
+    _snapshot(path, irsc_reports, datetime(2026, 10, 17, 19))
+    first = pipeline.merge_snapshot(con, path)
+    assert first["latest_run"] == {"irsc": datetime(2026, 10, 17, 19)}
+    assert first["earliest"] is not None
+    second = pipeline.merge_snapshot(con, path)
+    assert second["earliest"] is None  # nothing added or updated
+    assert con.execute("SELECT count(*) FROM raw_events").fetchone()[0] == len(irsc_reports)
+    assert con.execute("SELECT count(*) FROM source_runs").fetchone()[0] == 1
+
+
+def test_fresh_snapshot_replaces_fetching_that_source(con, reports, tmp_path, monkeypatch):
+    calls = []
+
+    class Fake:
+        def __init__(self, name):
+            self.name = name
+
+        def fetch(self, client, start, end):
+            calls.append(self.name)
+            return []
+
+    monkeypatch.setattr(pipeline, "SOURCE_MODULES", {n: Fake(n) for n in ("irsc", "usgs", "emsc")})
+    now = datetime(2026, 10, 17, 19)
+    monkeypatch.setattr(pipeline, "utcnow", lambda: now)
+    path = tmp_path / "irsc.duckdb"
+
+    # Runner in Iran reported 30 minutes ago: IRSC comes from the snapshot only.
+    _snapshot(path, [r for r in reports if r.source == "irsc"], now - timedelta(minutes=30))
+    result = pipeline.run(con, None, path)
+    assert sorted(calls) == ["emsc", "usgs"]
+    assert result["events_rebuilt"] > 0
+
+    # Runner offline for 3 hours: IRSC is tried here again (and its failure shows on the site).
+    calls.clear()
+    path.unlink()
+    _snapshot(path, [], now - timedelta(hours=3))
+    pipeline.run(con, None, path)
+    assert sorted(calls) == ["emsc", "irsc", "usgs"]

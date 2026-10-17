@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import duckdb
 import httpx
@@ -21,6 +22,9 @@ SOURCE_MODULES = {"irsc": irsc, "usgs": usgs, "emsc": emsc}
 LOOKBACK = timedelta(days=2)
 # Events are rebuilt over this window each run; older events are frozen.
 REBUILD_WINDOW = timedelta(days=14)
+# A snapshot from another collector (the IRSC runner in Iran) counts as current
+# for this long. While it is current, its sources are not fetched again here.
+SNAPSHOT_FRESH = timedelta(hours=2)
 
 
 def collect(
@@ -64,11 +68,62 @@ def rebuild_events(con: duckdb.DuckDBPyConnection, since: datetime | None) -> in
     return len(rows)
 
 
-def run(con: duckdb.DuckDBPyConnection, sources: list[str] | None = None) -> dict:
+def merge_snapshot(con: duckdb.DuckDBPyConnection, path: Path) -> dict:
+    """Merge raw reports and the run log from another collector's database.
+
+    GitHub's hosted runners cannot reach IRSC, so a self-hosted runner in Iran
+    collects IRSC into a small database of its own. Merging the same snapshot
+    twice changes nothing. Returns each source's latest run in the snapshot and
+    the earliest report time that was added or updated.
+    """
+    quoted = str(path).replace("'", "''")
+    con.execute(f"ATTACH '{quoted}' AS snap (READ_ONLY)")
+    try:
+        con.execute(
+            """
+            CREATE OR REPLACE TEMP TABLE incoming AS
+            SELECT s.* FROM snap.raw_events s LEFT JOIN raw_events r USING (source, source_id)
+            WHERE r.fetched_at IS NULL OR s.fetched_at > r.fetched_at
+            """
+        )
+        earliest = con.execute("SELECT min(time_utc) FROM incoming").fetchone()[0]
+        con.execute("INSERT OR REPLACE INTO raw_events BY NAME SELECT * FROM incoming")
+        con.execute("DROP TABLE incoming")
+        con.execute(
+            """
+            INSERT INTO source_runs SELECT * FROM snap.source_runs s
+            WHERE NOT EXISTS (
+                SELECT 1 FROM source_runs r WHERE r.source = s.source AND r.started_at = s.started_at
+            )
+            """
+        )
+        latest = dict(con.execute("SELECT source, max(finished_at) FROM snap.source_runs GROUP BY source").fetchall())
+    finally:
+        con.execute("DETACH snap")
+    return {"latest_run": latest, "earliest": earliest}
+
+
+def run(
+    con: duckdb.DuckDBPyConnection,
+    sources: list[str] | None = None,
+    snapshot: Path | None = None,
+) -> dict:
     now = utcnow()
-    summary = collect(con, now - LOOKBACK, now, sources)
-    n = rebuild_events(con, now - REBUILD_WINDOW)
-    return {"sources": summary, "events_rebuilt": n}
+    todo = list(sources or SOURCE_MODULES)
+    rebuild_from = now - REBUILD_WINDOW
+    result: dict = {}
+    if snapshot is not None:
+        merged = merge_snapshot(con, snapshot)
+        fresh = [s for s, t in merged["latest_run"].items() if now - t <= SNAPSHOT_FRESH]
+        if fresh:
+            log.info("snapshot is current for %s, not fetching it here", ", ".join(fresh))
+        todo = [s for s in todo if s not in fresh]
+        if merged["earliest"] is not None:
+            rebuild_from = min(rebuild_from, merged["earliest"])
+        result["snapshot"] = {s: str(t) for s, t in merged["latest_run"].items()}
+    result["sources"] = collect(con, now - LOOKBACK, now, todo) if todo else {}
+    result["events_rebuilt"] = rebuild_events(con, rebuild_from)
+    return result
 
 
 def backfill(con: duckdb.DuckDBPyConnection, days: int, sources: list[str] | None = None) -> dict:

@@ -1,0 +1,66 @@
+name: IRSC
+
+# Every 30 minutes on a self-hosted runner in Iran, because GitHub's hosted
+# runners cannot reach irsc.ut.ac.ir. Collects IRSC into a small snapshot
+# database, uploads it to the data-latest release as irsc.duckdb, then starts
+# Monitor, which merges the snapshot into fezfm.duckdb and publishes the site.
+#
+# This workflow never writes fezfm.duckdb, so it stays out of the "monitor"
+# concurrency group. While the runner is offline its runs wait in the queue
+# (up to 24 hours) without holding up Monitor.
+#
+# Runs only when the repository variable IRSC_RUNNER is "true".
+# Setup: "IRSC from a runner in Iran" in README.md.
+on:
+  schedule:
+    - cron: "10,40 * * * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Days of IRSC history to fetch (empty for the usual last 2 days)
+        required: false
+
+permissions:
+  contents: write # upload irsc.duckdb to the data-latest release
+  actions: write # start the Monitor workflow
+
+concurrency:
+  group: irsc
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: data-latest
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  collect:
+    if: vars.IRSC_RUNNER == 'true'
+    runs-on: [self-hosted, iran]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: collector/uv.lock
+
+      # A fresh file each run keeps the snapshot small. A failed fetch is
+      # recorded in it too, so the site shows IRSC as unreachable.
+      - name: Collect IRSC
+        working-directory: collector
+        env:
+          DAYS: ${{ inputs.days }}
+        run: |
+          rm -f irsc.duckdb
+          if [ -n "$DAYS" ]; then
+            uv run fezfm --db irsc.duckdb backfill --days "$DAYS" --source irsc
+          else
+            uv run fezfm --db irsc.duckdb collect --source irsc
+          fi
+
+      - name: Upload the snapshot
+        run: gh release upload "$RELEASE_TAG" collector/irsc.duckdb --clobber
+
+      - name: Publish
+        run: gh workflow run monitor.yml
