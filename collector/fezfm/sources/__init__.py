@@ -7,10 +7,12 @@ import httpx
 USER_AGENT = "FEZfm/0.1 (+https://github.com/FEZtool-team/FEZfm)"
 
 
-def make_client(timeout: float = 60.0) -> httpx.Client:
+def make_client() -> httpx.Client:
+    # Fail fast on servers that drop connections (connect 10 s, x3 with retries)
+    # but allow slow responses for large catalog queries (45 s between bytes).
     transport = httpx.HTTPTransport(retries=2)
     return httpx.Client(
-        timeout=timeout,
+        timeout=httpx.Timeout(45.0, connect=10.0),
         transport=transport,
         follow_redirects=True,
         headers={"User-Agent": USER_AGENT},

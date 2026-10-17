@@ -72,14 +72,25 @@ def run(con: duckdb.DuckDBPyConnection, sources: list[str] | None = None) -> dic
 
 
 def backfill(con: duckdb.DuckDBPyConnection, days: int, sources: list[str] | None = None) -> dict:
-    """Seed history in 7-day windows (keeps each request well under source limits)."""
+    """Seed history in 7-day windows (keeps each request well under source limits).
+
+    A source that fails in one window is skipped in the later ones, so an
+    unreachable server (IRSC from GitHub's runners, for example) costs one
+    timeout instead of one per window.
+    """
     end = utcnow()
     start = end - timedelta(days=days)
+    active = list(sources or SOURCE_MODULES)
     out = []
     t = start
-    while t < end:
+    while t < end and active:
         t2 = min(t + timedelta(days=7), end)
-        out.append(collect(con, t, t2, sources))
+        summary = collect(con, t, t2, active)
+        out.append(summary)
+        failed = [name for name, s in summary.items() if not s["ok"]]
+        if failed:
+            log.warning("skipping %s for the rest of the backfill", ", ".join(failed))
+            active = [name for name in active if name not in failed]
         t = t2
     n = rebuild_events(con, None)
     return {"windows": out, "events_rebuilt": n}

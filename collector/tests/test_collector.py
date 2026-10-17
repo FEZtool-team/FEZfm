@@ -136,3 +136,24 @@ def test_rebuild_and_export(con, reports, tmp_path, monkeypatch):
 def test_headline_zone_label():
     assert feed.zone_label("NE-LUT") == "NE Lut"
     assert feed.zone_label("VAN-TABRIZ") == "Van-Tabriz"
+
+
+def test_backfill_skips_a_source_after_it_fails(con, monkeypatch):
+    calls = {"down": 0, "up": 0}
+
+    class Down:
+        @staticmethod
+        def fetch(client, start, end):
+            calls["down"] += 1
+            raise TimeoutError("connect timed out")
+
+    class Up:
+        @staticmethod
+        def fetch(client, start, end):
+            calls["up"] += 1
+            return []
+
+    monkeypatch.setattr(pipeline, "SOURCE_MODULES", {"down": Down, "up": Up})
+    result = pipeline.backfill(con, days=21, sources=None)
+    assert calls == {"down": 1, "up": 3}  # three 7-day windows, "down" tried once
+    assert result["windows"][0]["down"]["ok"] is False
