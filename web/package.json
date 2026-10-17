@@ -1,0 +1,25 @@
+{
+  "name": "fezfm-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxtjs/google-fonts": "^3.2.0",
+    "leaflet": "^1.9.4",
+    "nuxt": "^3.14.1592",
+    "unplugin-icons": "^0.21.0",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@iconify/json": "^2.2.279",
+    "@nuxtjs/tailwindcss": "^6.12.2",
+    "@types/leaflet": "^1.9.20"
+  }
+}

@@ -1,0 +1,613 @@
+{
+ "type": "FeatureCollection",
+ "name": "fezfm_fault_zones",
+ "description": "Faultiuo's 21 monitored fault zones. Traces are approximate (approximate=true) until replaced from Faultiuo's KML with `fezfm import-kml`. width_km is the half-width of the monitoring buffer.",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "AVAJ",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      48.9,
+      35.78
+     ],
+     [
+      49.15,
+      35.62
+     ],
+     [
+      49.45,
+      35.45
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "BAM-RAVAR",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      58.45,
+      28.75
+     ],
+     [
+      58.35,
+      29.25
+     ],
+     [
+      57.95,
+      30.2
+     ],
+     [
+      57.35,
+      30.95
+     ],
+     [
+      56.8,
+      31.4
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "DAMAVAND",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      51.15,
+      35.92
+     ],
+     [
+      51.8,
+      35.8
+     ],
+     [
+      52.3,
+      35.72
+     ],
+     [
+      52.75,
+      35.62
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "DEHSHIR",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      54.6,
+      29.9
+     ],
+     [
+      54.05,
+      30.95
+     ],
+     [
+      53.3,
+      32.4
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "IPAK",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      49.55,
+      35.78
+     ],
+     [
+      50.0,
+      35.68
+     ],
+     [
+      50.45,
+      35.58
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "KAZEROON",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      51.95,
+      28.55
+     ],
+     [
+      51.65,
+      29.6
+     ],
+     [
+      51.2,
+      30.5
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "KERMAN",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      57.25,
+      30.7
+     ],
+     [
+      57.7,
+      29.9
+     ],
+     [
+      58.0,
+      29.3
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "KOPEDAGH",
+    "width_km": 40,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      56.0,
+      39.1
+     ],
+     [
+      57.5,
+      38.3
+     ],
+     [
+      58.4,
+      37.75
+     ],
+     [
+      59.2,
+      37.45
+     ],
+     [
+      60.0,
+      36.6
+     ],
+     [
+      60.6,
+      35.8
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "KUHBANAN",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      57.45,
+      30.45
+     ],
+     [
+      56.7,
+      31.15
+     ],
+     [
+      55.9,
+      31.85
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "NE-LUT",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      59.6,
+      34.2
+     ],
+     [
+      60.0,
+      32.5
+     ],
+     [
+      60.3,
+      31.0
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "NEYSHABUR",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      58.3,
+      36.55
+     ],
+     [
+      58.9,
+      36.3
+     ],
+     [
+      59.45,
+      36.05
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "QOM",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      50.0,
+      35.05
+     ],
+     [
+      50.55,
+      34.7
+     ],
+     [
+      51.05,
+      34.45
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "SEMNAN",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      52.6,
+      35.66
+     ],
+     [
+      53.1,
+      35.73
+     ],
+     [
+      53.7,
+      35.81
+     ],
+     [
+      54.1,
+      35.95
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "SEIMARE",
+    "width_km": 50,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      45.8,
+      34.8
+     ],
+     [
+      47.0,
+      33.6
+     ],
+     [
+      48.2,
+      32.6
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "SHAHRUD",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      53.9,
+      36.1
+     ],
+     [
+      55.0,
+      36.4
+     ],
+     [
+      56.2,
+      36.7
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "SABZVAR",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      56.4,
+      36.55
+     ],
+     [
+      57.0,
+      36.42
+     ],
+     [
+      57.7,
+      36.25
+     ],
+     [
+      58.2,
+      36.1
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "TEHRAN",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      50.9,
+      35.85
+     ],
+     [
+      51.3,
+      35.82
+     ],
+     [
+      51.75,
+      35.76
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "TURKMANCHAY",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      47.0,
+      37.4
+     ],
+     [
+      47.4,
+      37.62
+     ],
+     [
+      47.8,
+      37.9
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "VAN-TABRIZ",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      43.3,
+      38.5
+     ],
+     [
+      44.6,
+      38.6
+     ],
+     [
+      45.6,
+      38.25
+     ],
+     [
+      46.3,
+      38.1
+     ],
+     [
+      47.0,
+      37.85
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "WEST-LUT",
+    "width_km": 20,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      57.45,
+      33.2
+     ],
+     [
+      57.55,
+      31.5
+     ],
+     [
+      57.75,
+      30.6
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "ZAGROS",
+    "width_km": 50,
+    "approximate": true,
+    "source": "FEZfm approximate trace"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      45.5,
+      35.6
+     ],
+     [
+      46.6,
+      34.6
+     ],
+     [
+      48.0,
+      33.6
+     ],
+     [
+      49.5,
+      32.6
+     ],
+     [
+      51.0,
+      31.4
+     ],
+     [
+      52.8,
+      29.9
+     ],
+     [
+      54.6,
+      28.9
+     ],
+     [
+      56.4,
+      28.0
+     ]
+    ]
+   }
+  }
+ ]
+}

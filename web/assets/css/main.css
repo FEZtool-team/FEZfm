@@ -1,0 +1,266 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens. Colors are stored as RGB channels so Tailwind opacity
+ * modifiers work (bg-fm-500/10). Tailwind names: fez-*, fm-*.
+ * Monochrome fez-* is the FEZtool/team brand; fm-* (FEZfm blue) is used for
+ * monitor data: magnitudes, depth, fault zones, tool badges. Dark is the default; the light theme below
+ * redefines the same variables, so components never need theme variants.
+ */
+:root {
+  /* FEZteam brand, monochrome. 50/100/400/500/700/900 come from the Figma palette (node 349-116). */
+  --fez-50: 248 249 250; /* #F8F9FA */
+  --fez-100: 233 236 239; /* #E9ECEF */
+  --fez-200: 222 226 230; /* #DEE2E6 */
+  --fez-300: 206 212 218; /* #CED4DA */
+  --fez-400: 173 181 189; /* #ADB5BD */
+  --fez-500: 108 117 125; /* #6C757D */
+  --fez-600: 73 80 87; /* #495057 */
+  --fez-700: 52 58 64; /* #343A40 */
+  --fez-800: 43 48 53; /* #2B3035 */
+  --fez-900: 33 37 41; /* #212529 */
+  --fez-950: 26 29 32; /* #1A1D20 */
+  /* FEZfm blue */
+  --fm-50: 239 246 255; /* #EFF6FF */
+  --fm-100: 219 234 254; /* #DBEAFE */
+  --fm-200: 191 219 254; /* #BFDBFE */
+  --fm-300: 147 197 253; /* #93C5FD */
+  --fm-400: 96 165 250; /* #60A5FA */
+  --fm-500: 59 130 246; /* #3B82F6 */
+  --fm-600: 37 99 235; /* #2563EB */
+  --fm-700: 29 78 216; /* #1D4ED8 */
+  --fm-800: 30 64 175; /* #1E40AF */
+  --fm-900: 30 58 138; /* #1E3A8A */
+
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glass-strong: rgba(255, 255, 255, 0.16);
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --space-section: clamp(5rem, 10vw, 8.5rem);
+  --space-gutter: clamp(1rem, 4vw, 2rem);
+
+  --glow-fm: 0 0 64px -16px rgb(var(--fm-500) / 0.55);
+  --shadow-panel: 0 24px 48px -24px rgb(0 0 0 / 0.6);
+
+  --on-tool: 26 29 32;
+  --logo-accent: 173 181 189;
+  --star-alpha: 0.7;
+
+}
+
+/* Light theme: html[data-theme] is set before paint by the script in nuxt.config.ts. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  /* Neutral scale inverted around 500 so classes keep their meaning. */
+  --fez-50: 26 29 32; /* #1A1D20 */
+  --fez-100: 33 37 41; /* #212529 */
+  --fez-200: 43 48 53; /* #2B3035 */
+  --fez-300: 52 58 64; /* #343A40 */
+  --fez-400: 73 80 87; /* #495057 */
+  --fez-500: 92 99 106; /* #5C636A */
+  --fez-600: 173 181 189; /* #ADB5BD */
+  --fez-700: 206 212 218; /* #CED4DA */
+  --fez-800: 222 226 230; /* #DEE2E6 */
+  --fez-900: 233 236 239; /* #E9ECEF */
+  --fez-950: 248 249 250; /* #F8F9FA */
+  /* Tool scales flipped (50<->900) so tinted text stays readable on light. */
+  --fm-50: 30 58 138;
+  --fm-100: 30 64 175;
+  --fm-200: 29 78 216;
+  --fm-300: 37 99 235;
+  --fm-400: 59 130 246;
+  --fm-500: 96 165 250;
+  --fm-600: 147 197 253;
+  --fm-700: 191 219 254;
+  --fm-800: 219 234 254;
+  --fm-900: 239 246 255;
+
+  --border-glass: rgba(0, 0, 0, 0.1);
+  --border-glass-strong: rgba(0, 0, 0, 0.18);
+  --shadow-panel: 0 24px 48px -24px rgb(0 0 0 / 0.18);
+  --logo-accent: 108 117 125;
+  --star-alpha: 0.25;
+
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+  /* Clears the fixed navbar for both native anchors and router hash scrolls. */
+  [id] {
+    scroll-margin-top: 4.5rem;
+  }
+  body {
+    @apply bg-fez-900 text-fez-100 font-sans antialiased;
+  }
+  ::selection {
+    @apply bg-fez-50 text-fez-900;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--fez-50));
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Translucent surface with a hairline border. */
+  .glass {
+    background: rgb(var(--fez-800) / 0.55);
+    border: 1px solid var(--border-glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /* Monochrome metallic fill for large display type. */
+  .text-gradient {
+    background: linear-gradient(180deg, rgb(var(--fez-50)) 30%, rgb(var(--fez-400)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Faint coordinate grid, the moodboard's blueprint texture. */
+  .bg-grid {
+    background-image: linear-gradient(var(--border-glass) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-glass) 1px, transparent 1px);
+    background-size: 64px 64px;
+    background-position: center top;
+  }
+
+  /* Starfield: layered radial gradients, no images. */
+  .bg-starfield {
+    background-image: radial-gradient(1px 1px at 12% 18%, rgb(var(--fez-50) / 0.8), transparent 60%),
+      radial-gradient(1px 1px at 27% 72%, rgb(var(--fez-50) / 0.55), transparent 60%),
+      radial-gradient(1.5px 1.5px at 41% 33%, rgb(var(--fez-50) / 0.7), transparent 60%),
+      radial-gradient(1px 1px at 58% 84%, rgb(var(--fez-50) / 0.5), transparent 60%),
+      radial-gradient(1px 1px at 66% 12%, rgb(var(--fez-50) / 0.75), transparent 60%),
+      radial-gradient(1.5px 1.5px at 79% 46%, rgb(var(--fez-50) / 0.6), transparent 60%),
+      radial-gradient(1px 1px at 88% 78%, rgb(var(--fez-50) / 0.7), transparent 60%),
+      radial-gradient(1px 1px at 94% 24%, rgb(var(--fez-50) / 0.45), transparent 60%),
+      radial-gradient(1px 1px at 6% 58%, rgb(var(--fez-50) / 0.5), transparent 60%),
+      radial-gradient(1px 1px at 35% 8%, rgb(var(--fez-50) / 0.6), transparent 60%),
+      radial-gradient(1px 1px at 50% 55%, rgb(var(--fez-50) / 0.35), transparent 60%),
+      radial-gradient(1px 1px at 19% 92%, rgb(var(--fez-50) / 0.45), transparent 60%);
+    background-size: 420px 420px;
+    opacity: var(--star-alpha);
+  }
+
+  .paragraph {
+    @apply text-fez-400 leading-relaxed;
+  }
+
+  .field {
+    @apply block w-full rounded-md border border-glass bg-fez-950/60 px-3.5 py-2.5 text-sm text-fez-50 placeholder-fez-500 transition-colors focus:border-fez-400 focus:outline-none;
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm text-fez-300;
+  }
+}
+
+/* remove the spinner on number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+
+/* Leaflet map: popup, controls and zone labels restyled with the same tokens. */
+.fezfm-map {
+  background: rgb(var(--fez-950));
+  font-family: Outfit, sans-serif;
+}
+.fezfm-map .leaflet-popup-content-wrapper {
+  background: rgb(var(--fez-800));
+  color: rgb(var(--fez-100));
+  border: 1px solid var(--border-glass-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+.fezfm-map .leaflet-popup-content {
+  margin: 0.75rem 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+.fezfm-map .leaflet-popup-tip {
+  background: rgb(var(--fez-800));
+}
+.fezfm-map a.leaflet-popup-close-button {
+  color: rgb(var(--fez-400));
+}
+.fezfm-popup-title {
+  margin: 0;
+  font-weight: 500;
+  color: rgb(var(--fez-50));
+}
+.fezfm-popup-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: rgb(var(--fez-400));
+}
+.fezfm-popup-links {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: rgb(var(--fez-300));
+}
+.fezfm-popup-links a {
+  color: rgb(var(--fez-200));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.fezfm-map .leaflet-bar {
+  border: 1px solid var(--border-glass);
+  box-shadow: none;
+}
+.fezfm-map .leaflet-bar a {
+  background: rgb(var(--fez-800));
+  color: rgb(var(--fez-100));
+  border-bottom-color: var(--border-glass);
+}
+.fezfm-map .leaflet-bar a:hover {
+  background: rgb(var(--fez-700));
+}
+.fezfm-map .leaflet-control-attribution {
+  background: rgb(var(--fez-900) / 0.75);
+  color: rgb(var(--fez-400));
+}
+.fezfm-map .leaflet-control-attribution a {
+  color: rgb(var(--fez-300));
+}
+.fezfm-zone-label {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgb(var(--fm-300));
+  text-shadow: 0 0 3px rgb(var(--fez-900)), 0 0 3px rgb(var(--fez-900));
+}
+.fezfm-zone-label::before {
+  display: none;
+}
+.fezfm-zoom-low .fezfm-zone-label {
+  display: none;
+}

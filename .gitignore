@@ -1,0 +1,36 @@
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Collector database (lives in the data-latest GitHub release)
+*.duckdb
+*.duckdb.wal
+
+# Generated each run by `fezfm export`
+web/public/data/
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example

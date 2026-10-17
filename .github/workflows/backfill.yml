@@ -1,0 +1,43 @@
+name: Backfill
+
+# Manual: add older history to the database in the data-latest release.
+# The next Monitor run publishes the result.
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Days of history to fetch
+        default: "30"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monitor
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: data-latest
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: collector/uv.lock
+      - name: Download the database
+        run: gh release download "$RELEASE_TAG" -p fezfm.duckdb -D collector || echo "No database yet, starting fresh."
+      - name: Backfill
+        working-directory: collector
+        run: uv run fezfm backfill --days "${{ inputs.days }}"
+      - name: Upload the database
+        run: |
+          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || \
+            gh release create "$RELEASE_TAG" --title "Latest data" --latest=false --notes "Rolling release."
+          gh release upload "$RELEASE_TAG" collector/fezfm.duckdb --clobber

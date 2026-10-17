@@ -1,0 +1,105 @@
+name: Monitor
+
+# Every 30 minutes: collect earthquake reports, update the database in the
+# data-latest release, rebuild the site and publish it to GitHub Pages.
+# GitHub may start scheduled runs 5-15 minutes late.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "collector/**"
+      - "web/**"
+      - ".github/workflows/monitor.yml"
+
+permissions:
+  contents: write # read/write the data-latest release
+  pages: write
+  id-token: write
+  actions: write # keep the schedule enabled (see last step)
+
+concurrency:
+  group: monitor
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: data-latest
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: collector/uv.lock
+
+      - name: Ensure the data release exists
+        run: |
+          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || \
+            gh release create "$RELEASE_TAG" --title "Latest data" --latest=false \
+              --notes "Rolling release. fezfm.duckdb is replaced every 30 minutes by the Monitor workflow."
+
+      - name: Download the database
+        run: gh release download "$RELEASE_TAG" -p fezfm.duckdb -D collector || echo "No database yet, starting fresh."
+
+      - name: Collect
+        working-directory: collector
+        run: |
+          if [ -f fezfm.duckdb ]; then
+            uv run fezfm collect
+          else
+            uv run fezfm backfill --days 30
+          fi
+
+      - name: Upload the database
+        run: gh release upload "$RELEASE_TAG" collector/fezfm.duckdb --clobber
+
+      - name: Export site data
+        working-directory: collector
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          uv run fezfm export --out ../web/public/data \
+            --site-url "https://${owner}.github.io/${repo}/" \
+            --db-url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/fezfm.duckdb"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build the site
+        working-directory: web
+        run: |
+          npm ci
+          NUXT_APP_BASE_URL="/${GITHUB_REPOSITORY#*/}/" \
+          NUXT_PUBLIC_REPO_URL="https://github.com/${GITHUB_REPOSITORY}" \
+          npm run generate
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: web/.output/public
+
+      # GitHub disables scheduled workflows after 60 days without repository
+      # activity. Re-enabling an enabled workflow resets that timer.
+      - name: Keep the schedule alive
+        if: github.event_name == 'schedule'
+        run: gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/monitor.yml/enable" || true
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
