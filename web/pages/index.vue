@@ -17,7 +17,11 @@
     <div class="mt-6 grid gap-6 lg:grid-cols-12">
       <section class="order-2 lg:order-none lg:col-span-6 xl:col-span-5" aria-labelledby="feed-title">
         <h2 id="feed-title" class="sr-only">Event feed</h2>
-        <div class="overflow-hidden rounded-lg border border-glass">
+        <!-- The list scrolls inside its own panel, the same height as the map beside it. -->
+        <div
+          class="max-h-[70vh] overflow-y-auto overscroll-contain rounded-lg border border-glass lg:h-[calc(100vh-14rem)] lg:max-h-none"
+          @scroll.passive="onScroll"
+        >
           <template v-if="latest">
             <QuakeCard
               v-for="q in shown"
@@ -31,7 +35,7 @@
               No events match these filters in the {{ WINDOWS[win].label.toLowerCase() }}.
             </p>
             <div v-if="filtered.length > limit" class="p-4 text-center">
-              <BaseButton variant="ghost" @click="limit += step">Show more ({{ filtered.length - limit }} left)</BaseButton>
+              <BaseButton variant="ghost" @click="limit += STEP">Show more ({{ filtered.length - limit }} left)</BaseButton>
             </div>
           </template>
           <div v-else class="space-y-px" aria-hidden="true">
@@ -58,29 +62,25 @@
 </template>
 
 <script setup lang="ts">
-const { latest, filtered, now, win, selected } = useQuakes();
-// Phones get a short list (the map sits above it); wide screens show the
-// list beside a sticky map.
-const wide = ref(false);
-const step = computed(() => (wide.value ? 100 : 15));
-const limit = ref(15);
+const { latest, filtered, now, win, scope, minMag, depth, flag, source, selected } = useQuakes();
+// Cards are added a page at a time as the panel is scrolled, so a 7-day
+// window with thousands of events stays fast.
+const STEP = 50;
+const limit = ref(STEP);
 const shown = computed(() => filtered.value.slice(0, limit.value));
-watch([filtered, step], () => (limit.value = step.value));
+// Reset on a filter change only; `filtered` also updates on every clock tick.
+watch([win, scope, minMag, depth, flag, source], () => (limit.value = STEP));
 
-let mq: MediaQueryList | undefined;
-const onMedia = (e: MediaQueryListEvent) => (wide.value = e.matches);
-onMounted(() => {
-  mq = window.matchMedia("(min-width: 1024px)");
-  wide.value = mq.matches;
-  mq.addEventListener("change", onMedia);
-});
-onBeforeUnmount(() => mq?.removeEventListener("change", onMedia));
+const onScroll = (e: Event) => {
+  const el = e.target as HTMLElement;
+  if (el.scrollTop + el.clientHeight > el.scrollHeight - 600 && limit.value < filtered.value.length) limit.value += STEP;
+};
 
 const select = (id: string) => {
   selected.value = id;
   // A quake picked on the map may be past the end of the short list.
   const i = filtered.value.findIndex((q) => q.id === id);
-  if (i >= limit.value) limit.value = Math.ceil((i + 1) / step.value) * step.value;
+  if (i >= limit.value) limit.value = Math.ceil((i + 1) / STEP) * STEP;
   // Bring the card into view when the selection comes from the map.
   nextTick(() => document.querySelector('[aria-current="true"]')?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
 };
