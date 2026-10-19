@@ -3,7 +3,7 @@
     <div class="mx-auto flex max-w-7xl flex-col gap-4 px-gutter py-8 text-xs text-fez-500 sm:flex-row sm:items-center sm:justify-between">
       <p>
         FEZfm is part of <a :href="cfg.homeUrl" class="text-fez-300 hover:text-fez-50">FEZtool</a>, free and easy tools for Earth sciences.
-        Data from IRSC, USGS and EMSC. Not an official warning service.
+        Data from USGS and EMSC. Not an official warning service.
       </p>
       <p class="flex gap-4">
         <a :href="cfg.repoUrl" target="_blank" rel="noopener" class="hover:text-fez-50">Source code</a>

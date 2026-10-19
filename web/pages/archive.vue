@@ -13,7 +13,7 @@
       <select id="month" v-model="month" class="field w-auto rounded-full py-1.5 pr-8" :disabled="!months.length">
         <option v-for="m in months" :key="m.month" :value="m.month">{{ monthLabel(m.month) }} ({{ m.events }})</option>
       </select>
-      <QuakeFilters more hide-window class="contents" />
+      <QuakeFilters more hide-window :events="events" class="contents" />
       <a
         v-if="month"
         :href="`${base}data/archive/${month}.csv`"

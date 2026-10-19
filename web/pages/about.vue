@@ -13,21 +13,22 @@
     <h2 class="mt-10 text-xl font-semibold text-fez-100">Sources</h2>
     <dl class="mt-4 space-y-4 text-sm">
       <div>
-        <dt class="text-fez-100">IRSC, Iranian Seismological Center, Institute of Geophysics, University of Tehran</dt>
-        <dd class="paragraph">
-          The national network bulletin for Iran and adjacent areas (lat 24-41, lon 42-64), magnitude 2.5 and above.
-          Read from the bulletin search at irsc.ut.ac.ir, as Faultiuo does.
-        </dd>
-      </div>
-      <div>
         <dt class="text-fez-100">USGS, United States Geological Survey</dt>
         <dd class="paragraph">The global FDSN event service at earthquake.usgs.gov.</dd>
       </div>
       <div>
         <dt class="text-fez-100">EMSC, European-Mediterranean Seismological Centre</dt>
         <dd class="paragraph">
-          The FDSN event service at seismicportal.eu. EMSC also redistributes reports from Iranian agencies, which keeps
-          Iranian coverage when IRSC cannot be reached.
+          The FDSN event service at seismicportal.eu. EMSC also redistributes reports from Iranian agencies, and is the
+          main source for Iran.
+        </dd>
+      </div>
+      <div>
+        <dt class="text-fez-100">IRSC, Iranian Seismological Center, Institute of Geophysics, University of Tehran</dt>
+        <dd class="paragraph">
+          The national network bulletin for Iran, magnitude 2.5 and above. Not collected at the moment: irsc.ut.ac.ir
+          cannot be reached from outside Iran, where the collector runs. IRSC events collected earlier are kept. EMSC
+          and USGS list fewer small Iranian events than IRSC does.
         </dd>
       </div>
     </dl>
@@ -38,8 +39,9 @@
       <li>Reports are stored in a DuckDB database, one row per source and event.</li>
       <li>
         Reports from different sources are merged into one event when they are within 45 seconds, 80 km and one
-        magnitude unit of each other. Inside the Iran region the IRSC solution is preferred, elsewhere USGS, then EMSC.
+        magnitude unit of each other. USGS is preferred, then EMSC; inside the Iran region an earlier IRSC solution comes first.
       </li>
+      <li>Each event is tagged with its country, or the nearest country within about 150 km for offshore events.</li>
       <li>Each event is checked against the monitored fault zones and flagged as significant or part of an active sequence.</li>
       <li>The site, the feed and the download files are rebuilt and published to GitHub Pages.</li>
     </ol>

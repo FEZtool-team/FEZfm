@@ -44,6 +44,7 @@ def item(ev: dict) -> dict:
         "mag": None if ev["mag"] is None else round(ev["mag"], 1),
         "magType": ev["mag_type"],
         "place": ev["place"],
+        "country": ev.get("country"),
         "headline": headline(ev),
         "src": ev["preferred_source"],
         "sources": [{"name": s, "url": u or None} for s, u in zip(ev["sources"], ev["urls"])],

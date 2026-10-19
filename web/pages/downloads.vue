@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-bold text-fez-50">Data</h1>
     <p class="paragraph mt-3 max-w-2xl text-sm">
       Every file below is rebuilt each time the collector runs (every 30 minutes). Times are UTC. One row is one
-      earthquake after merging reports from IRSC, USGS and EMSC.
+      earthquake after merging reports from USGS and EMSC (and IRSC for earlier events).
     </p>
 
     <section class="mt-8" aria-labelledby="files">
@@ -123,7 +123,8 @@ const columns = [
   ["depth_km", "Hypocentre depth, km."],
   ["mag, mag_type", "Magnitude and its type as reported by the preferred source."],
   ["place", "Location description from the preferred source."],
-  ["preferred_source", "IRSC inside the Iran region, otherwise USGS, then EMSC."],
+  ["country", "Country of the epicentre, or the nearest within about 150 km offshore (GeoJSON and site data only)."],
+  ["preferred_source", "USGS, then EMSC; IRSC first inside the Iran region for earlier events."],
   ["sources", "Every source that reported the event."],
   ["in_iran_region", "Inside IRSC's box for Iran and adjacent areas (lat 24-41, lon 42-64)."],
   ["fault_zone", "Monitored fault zone whose buffer contains the epicentre, if any."],

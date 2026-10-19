@@ -2,8 +2,7 @@ name: Monitor
 
 # Every 30 minutes: collect earthquake reports, update the database in the
 # data-latest release, rebuild the site and publish it to GitHub Pages.
-# GitHub may start scheduled runs 5-15 minutes late. The IRSC workflow also
-# starts this one after each IRSC snapshot from the runner in Iran.
+# GitHub may start scheduled runs late, or skip some when it is busy.
 on:
   schedule:
     - cron: "*/30 * * * *"
@@ -50,22 +49,15 @@ jobs:
       - name: Download the database
         run: |
           gh release download "$RELEASE_TAG" -p fezfm.duckdb -D collector || echo "No database yet, starting fresh."
-          gh release download "$RELEASE_TAG" -p irsc.duckdb -D collector || echo "No IRSC snapshot."
 
-      # irsc.duckdb comes from the IRSC workflow on the runner in Iran. While it
-      # is less than 2 hours old, IRSC is not fetched here (GitHub's runners
-      # cannot reach it). When the runner is offline, IRSC is tried here again,
-      # fails, and the site shows it as unreachable; EMSC and USGS carry on.
+      # USGS and EMSC only. IRSC is off because GitHub's runners cannot reach
+      # it; EMSC relays Iranian agencies. IRSC events collected earlier stay.
       - name: Collect
         working-directory: collector
         timeout-minutes: 10
         run: |
           if [ -f fezfm.duckdb ]; then
-            if [ -f irsc.duckdb ]; then
-              uv run fezfm collect --snapshot irsc.duckdb
-            else
-              uv run fezfm collect
-            fi
+            uv run fezfm collect
           else
             uv run fezfm backfill --days 30
           fi
@@ -106,12 +98,10 @@ jobs:
       - name: Keep the schedules alive
         if: github.event_name == 'schedule'
         run: |
-          for wf in monitor.yml irsc.yml; do
-            state=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}" --jq .state || echo missing)
-            if [ "$state" != disabled_manually ] && [ "$state" != missing ]; then
-              gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}/enable" || true
-            fi
-          done
+          state=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/monitor.yml" --jq .state || echo missing)
+          if [ "$state" != disabled_manually ] && [ "$state" != missing ]; then
+            gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/monitor.yml/enable" || true
+          fi
 
   deploy:
     needs: build

@@ -12,6 +12,7 @@ export interface Quake {
   mag: number | null;
   magType: string | null;
   place: string | null;
+  country: string | null; // null: open ocean, more than ~150 km from any country
   headline: string;
   src: string;
   sources: QuakeSource[];
@@ -42,7 +43,6 @@ export interface Latest {
 }
 
 export type Window = "2h" | "24h" | "7d";
-export type Scope = "all" | "region" | "world";
 
 export const WINDOWS: Record<Window, { label: string; ms: number }> = {
   "2h": { label: "Last 2 hours", ms: 2 * 3600e3 },
@@ -50,10 +50,16 @@ export const WINDOWS: Record<Window, { label: string; ms: number }> = {
   "7d": { label: "Last 7 days", ms: 7 * 24 * 3600e3 },
 };
 
-export const SCOPES: Record<Scope, string> = {
-  all: "All",
-  region: "Iran and adjacent areas",
-  world: "Rest of the world",
+/** Country filter value for events far from any country. */
+export const OPEN_OCEAN = "ocean";
+
+/** Countries present in `events`, most events first, for the country filter. */
+export const countryOptions = (events: Quake[]) => {
+  const counts = new Map<string, number>();
+  for (const q of events) counts.set(q.country ?? OPEN_OCEAN, (counts.get(q.country ?? OPEN_OCEAN) ?? 0) + 1);
+  return [...counts]
+    .map(([value, n]) => ({ value, n, label: value === OPEN_OCEAN ? "Open ocean" : value }))
+    .sort((a, b) => b.n - a.n || a.label.localeCompare(b.label));
 };
 
 export type Depth = "all" | "shallow" | "intermediate" | "deep";
@@ -85,7 +91,7 @@ export const useQuakes = () => {
   const error = useState<string | null>("latest-error", () => null);
   const now = useState<number>("now", () => Date.now());
   const win = useState<Window>("filter-window", () => "24h");
-  const scope = useState<Scope>("filter-scope", () => "all");
+  const country = useState<string>("filter-country", () => "all");
   const minMag = useState<number>("filter-minmag", () => 0);
   const depth = useState<Depth>("filter-depth", () => "all");
   const flag = useState<Flag>("filter-flag", () => "all");
@@ -110,8 +116,7 @@ export const useQuakes = () => {
     clock ??= setInterval(() => (now.value = Date.now()), 30e3);
   });
 
-  const inScope = (q: Quake) =>
-    scope.value === "all" || (scope.value === "region" ? q.region : !q.region);
+  const inCountry = (q: Quake) => country.value === "all" || (q.country ?? OPEN_OCEAN) === country.value;
 
   const filtered = computed(() => {
     if (!latest.value) return [];
@@ -124,7 +129,7 @@ export const useQuakes = () => {
     const d = DEPTHS[depth.value];
     const km = q.depth ?? 10;
     return (
-      inScope(q) &&
+      inCountry(q) &&
       (q.mag ?? 0) >= minMag.value &&
       (depth.value === "all" || (km >= d.min && km < d.max)) &&
       (flag.value === "all" || (flag.value === "sig" ? q.sig : flag.value === "sequence" ? q.sequence : !!q.zone)) &&
@@ -132,7 +137,7 @@ export const useQuakes = () => {
     );
   };
 
-  return { latest, error, now, win, scope, minMag, depth, flag, source, selected, filtered, matches, load };
+  return { latest, error, now, win, country, minMag, depth, flag, source, selected, filtered, matches, load };
 };
 
 /** "12 min ago", "3 h ago", "2 d ago". */

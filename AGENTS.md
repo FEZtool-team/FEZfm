@@ -1,10 +1,11 @@
 # FEZfm agent notes
 
-FEZfm is the FEZtool fault and geohazard monitor. v1 is an earthquake feed plus map, published to GitHub Pages by a scheduled workflow. See README.md for the overview.
+FEZfm is the FEZtool fault and geohazard monitor. v1 is an earthquake feed plus map from USGS and EMSC (IRSC is off by default, see README), published to GitHub Pages by a scheduled workflow. See README.md for the overview.
 
 ## Layout
 
 - `collector/`: Python package `fezfm` (uv, Python 3.12).
+  - `countries.py`: country tag per event, from `web/public/layers/countries.geojson` (shapely).
   - `sources/{irsc,usgs,emsc}.py`: each exposes `fetch(client, start, end) -> list[Report]`.
   - `db.py`: DuckDB schema (`raw_events`, `events`, `source_runs`) and bulk loaders. Use the JSON-load helpers, not `executemany`, which is about 100 times slower.
   - `dedupe.py`: merging rules and the significant and sequence flags.

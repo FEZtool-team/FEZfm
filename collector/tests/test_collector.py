@@ -128,6 +128,7 @@ def test_rebuild_and_export(con, reports, tmp_path, monkeypatch):
     assert [s["name"] for s in minab["sources"]] == ["irsc", "emsc", "usgs"]
     assert minab["sig"] is True  # M4.3 in the Iran region
     assert minab["headline"].startswith("M4.3 earthquake, Nodej, Kerman")
+    assert minab["country"] == "Iran"
     assert (out / "feed.xml").read_text().count("<entry>") >= 4
     assert (out / "downloads" / "events_7d.parquet").exists()
     assert con.execute(f"SELECT count(*) FROM '{out / 'downloads' / 'events_7d.csv'}'").fetchone()[0] == 21
@@ -159,7 +160,7 @@ def test_backfill_skips_a_source_after_it_fails(con, monkeypatch):
             return []
 
     monkeypatch.setattr(pipeline, "SOURCE_MODULES", {"down": Down, "up": Up})
-    result = pipeline.backfill(con, days=21, sources=None)
+    result = pipeline.backfill(con, days=21, sources=["down", "up"])
     assert calls == {"down": 1, "up": 3}  # three 7-day windows, "down" tried once
     assert result["windows"][0]["down"]["ok"] is False
 
@@ -202,7 +203,8 @@ def test_fresh_snapshot_replaces_fetching_that_source(con, reports, tmp_path, mo
 
     # Runner in Iran reported 30 minutes ago: IRSC comes from the snapshot only.
     _snapshot(path, [r for r in reports if r.source == "irsc"], now - timedelta(minutes=30))
-    result = pipeline.run(con, None, path)
+    everything = ["irsc", "usgs", "emsc"]
+    result = pipeline.run(con, everything, path)
     assert sorted(calls) == ["emsc", "usgs"]
     assert result["events_rebuilt"] > 0
 
@@ -210,5 +212,20 @@ def test_fresh_snapshot_replaces_fetching_that_source(con, reports, tmp_path, mo
     calls.clear()
     path.unlink()
     _snapshot(path, [], now - timedelta(hours=3))
-    pipeline.run(con, None, path)
+    pipeline.run(con, everything, path)
     assert sorted(calls) == ["emsc", "irsc", "usgs"]
+
+
+def test_country_tagging():
+    from fezfm import countries
+
+    assert countries.name(35.62, 51.88) == "Iran"  # Bomehen
+    assert countries.name(38.3, 142.4) == "Japan"  # offshore, nearest coast
+    assert countries.name(0.0, -30.0) is None  # mid-Atlantic
+
+
+def test_irsc_is_off_by_default():
+    from fezfm import model
+
+    assert "irsc" not in model.SOURCES
+    assert "irsc" in pipeline.SOURCE_MODULES

@@ -13,7 +13,10 @@ IRAN_REGION = {"min_lat": 24.0, "max_lat": 41.0, "min_lon": 42.0, "max_lon": 64.
 # so the world feed stays readable.
 WORLD_MIN_MAG = 2.5
 
-SOURCES = ("irsc", "usgs", "emsc")
+# Sources collected by default. IRSC is off: irsc.ut.ac.ir cannot be reached
+# from outside Iran (GitHub's runners time out), so Iranian events come from
+# EMSC and USGS. `fezfm collect --source irsc` still works from inside Iran.
+SOURCES = ("usgs", "emsc")
 
 
 def in_iran_region(lat: float, lon: float) -> bool:

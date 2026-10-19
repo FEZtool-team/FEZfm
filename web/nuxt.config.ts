@@ -3,7 +3,7 @@ const baseURL = process.env.NUXT_APP_BASE_URL || "/";
 
 const siteTitle = "FEZfm: earthquake and fault-zone monitor";
 const siteDescription =
-  "FEZfm collects earthquake reports from IRSC, USGS and EMSC every 30 minutes and shows what happened in Iran and worldwide, with downloadable data.";
+  "FEZfm collects earthquake reports from USGS and EMSC every 30 minutes and shows what happened in Iran and worldwide, with downloadable data.";
 
 // Tailwind color scale backed by the RGB-channel CSS variables in main.css.
 const scale = (name: string, steps: number[]) =>

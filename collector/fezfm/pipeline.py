@@ -10,7 +10,7 @@ import duckdb
 import httpx
 
 from . import db, dedupe
-from .model import utcnow
+from .model import SOURCES, utcnow
 from .sources import emsc, irsc, make_client, usgs
 
 log = logging.getLogger("fezfm")
@@ -37,7 +37,7 @@ def collect(
     """Fetch every source independently. One failing source never stops the others."""
     client = client or make_client()
     summary = {}
-    for name in sources or list(SOURCE_MODULES):
+    for name in sources or list(SOURCES):
         mod = SOURCE_MODULES[name]
         started = utcnow()
         try:
@@ -109,7 +109,7 @@ def run(
     snapshot: Path | None = None,
 ) -> dict:
     now = utcnow()
-    todo = list(sources or SOURCE_MODULES)
+    todo = list(sources or SOURCES)
     rebuild_from = now - REBUILD_WINDOW
     result: dict = {}
     if snapshot is not None:
@@ -135,7 +135,7 @@ def backfill(con: duckdb.DuckDBPyConnection, days: int, sources: list[str] | Non
     """
     end = utcnow()
     start = end - timedelta(days=days)
-    active = list(sources or SOURCE_MODULES)
+    active = list(sources or SOURCES)
     out = []
     t = start
     while t < end and active:

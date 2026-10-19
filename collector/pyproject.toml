@@ -1,12 +1,13 @@
 [project]
 name = "fezfm"
 version = "0.1.0"
-description = "FEZfm collector: earthquake reports from IRSC, USGS and EMSC, stored in DuckDB and exported for the FEZfm monitor site."
+description = "FEZfm collector: earthquake reports from USGS and EMSC (IRSC optional), stored in DuckDB and exported for the FEZfm monitor site."
 license = "Apache-2.0"
 requires-python = ">=3.12"
 dependencies = [
     "duckdb>=1.1",
     "httpx>=0.27",
+    "shapely>=2.0",
 ]
 
 [project.scripts]

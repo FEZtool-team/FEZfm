@@ -4,8 +4,7 @@
       <div>
         <h1 class="text-3xl font-bold text-fez-50 sm:text-4xl">Recent earthquakes</h1>
         <p class="paragraph mt-2 max-w-2xl text-sm">
-          Reports from the Iranian Seismological Center (IRSC), USGS and EMSC, merged into one feed and refreshed every
-          30 minutes. All events in Iran and adjacent areas; elsewhere M{{ latest?.world_min_mag ?? 2.5 }} and above.
+          Reports from USGS and EMSC, merged into one feed and refreshed every 30 minutes. All events in Iran and adjacent areas; elsewhere M{{ latest?.world_min_mag ?? 2.5 }} and above.
         </p>
       </div>
       <QuakeFilters more />
@@ -62,14 +61,14 @@
 </template>
 
 <script setup lang="ts">
-const { latest, filtered, now, win, scope, minMag, depth, flag, source, selected } = useQuakes();
+const { latest, filtered, now, win, country, minMag, depth, flag, source, selected } = useQuakes();
 // Cards are added a page at a time as the panel is scrolled, so a 7-day
 // window with thousands of events stays fast.
 const STEP = 50;
 const limit = ref(STEP);
 const shown = computed(() => filtered.value.slice(0, limit.value));
 // Reset on a filter change only; `filtered` also updates on every clock tick.
-watch([win, scope, minMag, depth, flag, source], () => (limit.value = STEP));
+watch([win, country, minMag, depth, flag, source], () => (limit.value = STEP));
 
 const onScroll = (e: Event) => {
   const el = e.target as HTMLElement;

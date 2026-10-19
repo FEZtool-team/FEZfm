@@ -10,8 +10,8 @@ from xml.sax.saxutils import escape
 
 import duckdb
 
-from . import db, faults, feed
-from .model import IRAN_REGION, WORLD_MIN_MAG, utcnow
+from . import countries, db, faults, feed
+from .model import IRAN_REGION, SOURCES, WORLD_MIN_MAG, utcnow
 
 WINDOWS = {"2h": timedelta(hours=2), "24h": timedelta(hours=24), "7d": timedelta(days=7), "30d": timedelta(days=30)}
 FEED_WINDOW = timedelta(days=7)
@@ -28,7 +28,12 @@ def _events(con: duckdb.DuckDBPyConnection, since: datetime) -> list[dict]:
         f"SELECT {', '.join(EVENT_COLUMNS)} FROM events WHERE time_utc >= ? ORDER BY time_utc DESC",
         [since],
     ).fetchall()
-    return [dict(zip(EVENT_COLUMNS, r)) for r in rows]
+    return [_with_country(dict(zip(EVENT_COLUMNS, r))) for r in rows]
+
+
+def _with_country(e: dict) -> dict:
+    e["country"] = countries.name(e["lat"], e["lon"])
+    return e
 
 
 def _daily(con: duckdb.DuckDBPyConnection, now: datetime) -> list[dict]:
@@ -64,7 +69,7 @@ def _archive(con: duckdb.DuckDBPyConnection, out_dir: Path, now: datetime) -> li
             f"SELECT {', '.join(EVENT_COLUMNS)} FROM events WHERE time_utc >= ? AND time_utc < ? ORDER BY time_utc DESC",
             [start, end],
         ).fetchall()
-        events = [feed.item(dict(zip(EVENT_COLUMNS, r))) for r in rows]
+        events = [feed.item(_with_country(dict(zip(EVENT_COLUMNS, r)))) for r in rows]
         (arc / f"{month}.json").write_text(json.dumps({"month": month, "events": events}, separators=(",", ":")))
         query = f"""SELECT event_id, strftime(time_utc, '%Y-%m-%dT%H:%M:%SZ') AS time_utc, lat, lon, depth_km, mag,
                     mag_type, place, preferred_source, array_to_string(sources, ';') AS sources, in_iran_region,
@@ -91,6 +96,7 @@ def _geojson(events: list[dict]) -> dict:
                     "mag_type": e["mag_type"],
                     "depth_km": e["depth_km"],
                     "place": e["place"],
+                    "country": e["country"],
                     "preferred_source": e["preferred_source"],
                     "sources": e["sources"],
                     "in_iran_region": e["in_iran_region"],
@@ -122,7 +128,7 @@ def _atom(events: list[dict], now: datetime, site_url: str) -> str:
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>{escape(site_url)}</id>
   <title>FEZfm earthquake monitor</title>
-  <subtitle>Significant earthquakes worldwide and M3.5+ in Iran and adjacent areas, from IRSC, USGS and EMSC.</subtitle>
+  <subtitle>Significant earthquakes worldwide and M3.5+ in Iran and adjacent areas, from USGS and EMSC.</subtitle>
   <updated>{feed.z(now)}</updated>
   <link href="{escape(site_url)}"/>
   <author><name>FEZtool</name></author>
@@ -152,6 +158,7 @@ def export(con: duckdb.DuckDBPyConnection, out_dir: Path, site_url: str, db_url:
                 "error": s["error"],
             }
             for s in db.source_status(con)
+            if s["source"] in SOURCES
         ],
         "zones_approximate": any(zn.approximate for zn in faults.load_zones()),
         "db_url": db_url,
