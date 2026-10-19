@@ -8,7 +8,7 @@
           30 minutes. All events in Iran and adjacent areas; elsewhere M{{ latest?.world_min_mag ?? 2.5 }} and above.
         </p>
       </div>
-      <QuakeFilters />
+      <QuakeFilters more />
     </header>
 
     <QuakeStatus class="mt-5" />

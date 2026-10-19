@@ -33,11 +33,14 @@
       <span>{{ days[days.length - 1]?.day.slice(5) }}</span>
     </div>
 
-    <table class="sr-only">
-      <caption>Events per day in Iran and adjacent areas</caption>
-      <thead><tr><th>Day</th><th>Events</th></tr></thead>
-      <tbody><tr v-for="d in days" :key="d.day"><td>{{ d.day }}</td><td>{{ d.region }}</td></tr></tbody>
-    </table>
+    <!-- sr-only on the table itself does not clip its rows, which then extend the page below the footer. -->
+    <div class="sr-only">
+      <table>
+        <caption>Events per day in Iran and adjacent areas</caption>
+        <thead><tr><th>Day</th><th>Events</th></tr></thead>
+        <tbody><tr v-for="d in days" :key="d.day"><td>{{ d.day }}</td><td>{{ d.region }}</td></tr></tbody>
+      </table>
+    </div>
   </figure>
 </template>
 

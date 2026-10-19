@@ -51,6 +51,7 @@ const homeUrl = useRuntimeConfig().public.homeUrl;
 const links = [
   { label: "Feed", to: "/" },
   { label: "Map", to: "/map" },
+  { label: "Archive", to: "/archive" },
   { label: "Data", to: "/downloads" },
   { label: "About", to: "/about" },
 ];

@@ -84,6 +84,8 @@ export default defineNuxtConfig({
             fez: scale("fez", [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]),
             fm: scale("fm", toolSteps),
             "on-tool": "rgb(var(--on-tool) / <alpha-value>)",
+            "map-plate": "rgb(var(--map-plate) / <alpha-value>)",
+            "map-ink": "rgb(var(--map-ink) / <alpha-value>)",
             glass: "var(--border-glass)",
             "glass-strong": "var(--border-glass-strong)",
           },
@@ -113,7 +115,7 @@ export default defineNuxtConfig({
     preset: "github-pages",
     prerender: {
       crawlLinks: true,
-      routes: ["/", "/map", "/downloads", "/about"],
+      routes: ["/", "/map", "/archive", "/downloads", "/about"],
       // Data files are copied from public/ as-is; the crawler must not treat them as pages.
       ignore: ["/data/", "/layers/", "/FEZfm/data/", "/FEZfm/layers/"],
     },

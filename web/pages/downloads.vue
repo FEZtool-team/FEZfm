@@ -72,8 +72,16 @@ ORDER BY time_utc DESC LIMIT 20;</pre>
             <span class="text-fez-400">: the 21 monitored zones and their buffer widths.</span>
           </li>
           <li>
+            <NuxtLink to="/archive" class="text-fez-100 underline decoration-fez-600 underline-offset-4 hover:text-fez-50">Monthly archive</NuxtLink>
+            <span class="text-fez-400">: every stored event, one CSV file per calendar month.</span>
+          </li>
+          <li>
             <a :href="`${base}layers/gem_active_faults.geojson`" class="text-fez-100 underline decoration-fez-600 underline-offset-4 hover:text-fez-50">gem_active_faults.geojson</a>
-            <span class="text-fez-400">: GEM active faults for the region (CC BY-SA 4.0).</span>
+            <span class="text-fez-400">: GEM active faults worldwide, simplified (CC BY-SA 4.0).</span>
+          </li>
+          <li>
+            <a :href="`${base}layers/plate_boundaries.geojson`" class="text-fez-100 underline decoration-fez-600 underline-offset-4 hover:text-fez-50">plate_boundaries.geojson</a>
+            <span class="text-fez-400">: plate boundaries from Bird (2003), PB2002 (ODC-BY 1.0).</span>
           </li>
         </ul>
       </div>

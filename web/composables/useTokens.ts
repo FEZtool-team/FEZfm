@@ -56,3 +56,14 @@ export const magRadius = (mag: number | null) => {
   const t = (Math.pow(1.6, m - x0) - 1) / (Math.pow(1.6, x1 - x0) - 1);
   return y0 + t * (y1 - y0);
 };
+
+/** Marker size factor for the map zoom: smaller at world scale, larger when zoomed in. Shared with the legend. */
+export const zoomScale = (zoom: number) => Math.min(1.8, Math.max(0.75, 2 ** ((zoom - 3) / 4)));
+
+/** Map overlays the legend can switch on and off. */
+export interface MapLayers {
+  relief: boolean;
+  plates: boolean;
+  faults: boolean;
+  zones: boolean;
+}

@@ -67,8 +67,10 @@
 
     <h2 class="mt-10 text-xl font-semibold text-fez-100">Map data</h2>
     <p class="paragraph mt-4 text-sm">
-      Country outlines from Natural Earth (public domain), drawn on the site itself so the map needs no tile service. Active faults from the GEM Global Active Faults Database
-      (CC BY-SA 4.0).
+      Every map layer is served by the site itself, so the map needs no tile service. Country outlines from Natural Earth
+      (public domain). Active faults worldwide from the GEM Global Active Faults Database (CC BY-SA 4.0). Plate boundaries
+      from Bird (2003), PB2002 (ODC-BY 1.0). The optional relief is shaded GEBCO Grid imagery from the GEBCO Compilation
+      Group.
     </p>
   </div>
 </template>

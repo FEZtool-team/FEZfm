@@ -56,6 +56,23 @@ export const SCOPES: Record<Scope, string> = {
   world: "Rest of the world",
 };
 
+export type Depth = "all" | "shallow" | "intermediate" | "deep";
+export type Flag = "all" | "sig" | "sequence" | "zone";
+
+export const DEPTHS: Record<Depth, { label: string; min: number; max: number }> = {
+  all: { label: "Any depth", min: -Infinity, max: Infinity },
+  shallow: { label: "Shallow, 0-70 km", min: -Infinity, max: 70 },
+  intermediate: { label: "Intermediate, 70-300 km", min: 70, max: 300 },
+  deep: { label: "Deep, 300 km+", min: 300, max: Infinity },
+};
+
+export const FLAGS: Record<Flag, string> = {
+  all: "All events",
+  sig: "Significant only",
+  sequence: "Active sequences",
+  zone: "In a monitored zone",
+};
+
 export const SOURCE_LABELS: Record<string, string> = { irsc: "IRSC", usgs: "USGS", emsc: "EMSC" };
 
 const REFRESH_MS = 5 * 60e3;
@@ -70,6 +87,9 @@ export const useQuakes = () => {
   const win = useState<Window>("filter-window", () => "24h");
   const scope = useState<Scope>("filter-scope", () => "all");
   const minMag = useState<number>("filter-minmag", () => 0);
+  const depth = useState<Depth>("filter-depth", () => "all");
+  const flag = useState<Flag>("filter-flag", () => "all");
+  const source = useState<string>("filter-source", () => "all");
   const selected = useState<string | null>("selected-quake", () => null);
   const base = useRuntimeConfig().app.baseURL;
 
@@ -96,12 +116,23 @@ export const useQuakes = () => {
   const filtered = computed(() => {
     if (!latest.value) return [];
     const since = now.value - WINDOWS[win.value].ms;
-    return latest.value.events.filter(
-      (q) => Date.parse(q.t) >= since && inScope(q) && (q.mag ?? 0) >= minMag.value
-    );
+    return latest.value.events.filter((q) => Date.parse(q.t) >= since && matches(q));
   });
 
-  return { latest, error, now, win, scope, minMag, selected, filtered, load };
+  /** Every filter except the time window, shared with the archive page. */
+  const matches = (q: Quake) => {
+    const d = DEPTHS[depth.value];
+    const km = q.depth ?? 10;
+    return (
+      inScope(q) &&
+      (q.mag ?? 0) >= minMag.value &&
+      (depth.value === "all" || (km >= d.min && km < d.max)) &&
+      (flag.value === "all" || (flag.value === "sig" ? q.sig : flag.value === "sequence" ? q.sequence : !!q.zone)) &&
+      (source.value === "all" || q.sources.some((s) => s.name === source.value))
+    );
+  };
+
+  return { latest, error, now, win, scope, minMag, depth, flag, source, selected, filtered, matches, load };
 };
 
 /** "12 min ago", "3 h ago", "2 d ago". */

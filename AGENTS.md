@@ -10,11 +10,11 @@ FEZfm is the FEZtool fault and geohazard monitor. v1 is an earthquake feed plus 
   - `dedupe.py`: merging rules and the significant and sequence flags.
   - `faults.py`: fault zone tagging; zone geometry is in `data/fault_zones.geojson`.
   - `export.py`: writes `web/public/data/`, which is generated and gitignored.
-  - `scripts/gem_subset.py` and `scripts/basemap.py`: rebuild the static map layers in `web/public/layers/`.
+  - `scripts/gem_subset.py`, `scripts/plates.py`, `scripts/basemap.py` and `scripts/gebco_tiles.py`: rebuild the static map layers in `web/public/layers/` (GEBCO relief tiles are committed; the site never calls GEBCO).
 - `web/`: Nuxt 3 static site.
   - Design tokens are copied from FEZhome (`assets/css/main.css`).
   - The data composable is `composables/useQuakes.ts`.
-  - The map is `components/quake/Map.vue`: Leaflet canvas with a self-hosted Natural Earth basemap. It deliberately uses no WebGL and no third-party tiles; CARTO and Esri tiles fail from Iran.
+  - The map is `components/quake/Map.vue`: Leaflet canvas with a self-hosted Natural Earth basemap. It deliberately uses no WebGL and no third-party tiles; CARTO and Esri tiles fail from Iran. The world view is Pacific-centred, so vector layers and markers are drawn in three copies one world apart.
 
 ## Rules
 

@@ -45,6 +45,38 @@ def _daily(con: duckdb.DuckDBPyConnection, now: datetime) -> list[dict]:
     return [{"day": str(d), "region": r, "world": w, "significant": s} for d, r, w, s in rows]
 
 
+def _archive(con: duckdb.DuckDBPyConnection, out_dir: Path, now: datetime) -> list[dict]:
+    """One JSON and one CSV file per calendar month (UTC), plus an index, for the archive page."""
+    arc = out_dir / "archive"
+    arc.mkdir(exist_ok=True)
+    months = con.execute(
+        """
+        SELECT strftime(time_utc, '%Y-%m') AS month, count(*) AS events,
+               count(*) FILTER (WHERE in_iran_region) AS region, count(*) FILTER (WHERE significant) AS significant
+        FROM events GROUP BY month ORDER BY month DESC
+        """
+    ).fetchall()
+    index = []
+    for month, n, region, sig in months:
+        start = datetime.strptime(month, "%Y-%m")
+        end = (start + timedelta(days=32)).replace(day=1)
+        rows = con.execute(
+            f"SELECT {', '.join(EVENT_COLUMNS)} FROM events WHERE time_utc >= ? AND time_utc < ? ORDER BY time_utc DESC",
+            [start, end],
+        ).fetchall()
+        events = [feed.item(dict(zip(EVENT_COLUMNS, r))) for r in rows]
+        (arc / f"{month}.json").write_text(json.dumps({"month": month, "events": events}, separators=(",", ":")))
+        query = f"""SELECT event_id, strftime(time_utc, '%Y-%m-%dT%H:%M:%SZ') AS time_utc, lat, lon, depth_km, mag,
+                    mag_type, place, preferred_source, array_to_string(sources, ';') AS sources, in_iran_region,
+                    fault_zone, fault_distance_km, significant, sequence
+                    FROM events WHERE time_utc >= TIMESTAMP '{start.isoformat(sep=' ')}'
+                    AND time_utc < TIMESTAMP '{end.isoformat(sep=' ')}' ORDER BY time_utc DESC"""
+        con.execute(f"COPY ({query}) TO '{arc / f'{month}.csv'}' (HEADER, DELIMITER ',')")
+        index.append({"month": month, "events": n, "region": region, "significant": sig})
+    (arc / "index.json").write_text(json.dumps({"generated_at": feed.z(now), "months": index}, separators=(",", ":")))
+    return index
+
+
 def _geojson(events: list[dict]) -> dict:
     return {
         "type": "FeatureCollection",
@@ -144,4 +176,5 @@ def export(con: duckdb.DuckDBPyConnection, out_dir: Path, site_url: str, db_url:
         con.execute(f"COPY ({query}) TO '{dl / f'events_{name}.csv'}' (HEADER, DELIMITER ',')")
         con.execute(f"COPY ({query}) TO '{dl / f'events_{name}.parquet'}' (FORMAT PARQUET)")
     (out_dir / "downloads.json").write_text(json.dumps({"generated_at": feed.z(now), "counts": counts, "db_url": db_url}))
-    return {"events_7d": len(recent), "counts": counts}
+    months = _archive(con, out_dir, now)
+    return {"events_7d": len(recent), "counts": counts, "archive_months": len(months)}

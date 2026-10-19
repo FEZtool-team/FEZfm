@@ -49,6 +49,9 @@
 
   --on-tool: 26 29 32;
   --logo-accent: 173 181 189;
+  /* Map lines drawn over the GEBCO relief, which looks the same in both themes, so these do not flip. */
+  --map-ink: 26 29 32;
+  --map-plate: 220 38 38; /* plate boundaries, conventional red */
   --star-alpha: 0.7;
 
 }
@@ -248,6 +251,38 @@ input[type="number"] {
 .fezfm-map .leaflet-control-attribution a {
   color: rgb(var(--fez-300));
 }
+/* The relief is a fixed image; dim it a little under the dark theme. */
+:root[data-theme="dark"] .fezfm-map .leaflet-tile-pane {
+  filter: brightness(0.82) saturate(0.9);
+}
+.fezfm-popup-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.75rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+}
+.fezfm-popup-grid dt {
+  color: rgb(var(--fez-400));
+}
+.fezfm-popup-grid dd {
+  margin: 0;
+  color: rgb(var(--fez-100));
+  font-variant-numeric: tabular-nums;
+}
+.fezfm-popup-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0;
+}
+.fezfm-popup-tags span {
+  border: 1px solid rgb(var(--fm-500) / 0.5);
+  border-radius: 999px;
+  padding: 0 0.5rem;
+  font-size: 0.6875rem;
+  color: rgb(var(--fm-300));
+}
 .fezfm-zone-label {
   background: transparent;
   border: 0;
@@ -262,5 +297,17 @@ input[type="number"] {
   display: none;
 }
 .fezfm-zoom-low .fezfm-zone-label {
+  display: none;
+}
+.fezfm-quake-tip {
+  background: rgb(var(--fez-800));
+  color: rgb(var(--fez-100));
+  border: 1px solid var(--border-glass-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  font-family: Poppins, sans-serif;
+  font-size: 11px;
+}
+.fezfm-quake-tip::before {
   display: none;
 }

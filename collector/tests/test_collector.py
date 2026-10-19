@@ -131,6 +131,11 @@ def test_rebuild_and_export(con, reports, tmp_path, monkeypatch):
     assert (out / "feed.xml").read_text().count("<entry>") >= 4
     assert (out / "downloads" / "events_7d.parquet").exists()
     assert con.execute(f"SELECT count(*) FROM '{out / 'downloads' / 'events_7d.csv'}'").fetchone()[0] == 21
+    index = json.loads((out / "archive" / "index.json").read_text())
+    assert [m["month"] for m in index["months"]] == ["2026-10"]
+    month = json.loads((out / "archive" / "2026-10.json").read_text())
+    assert len(month["events"]) == index["months"][0]["events"] == 21
+    assert (out / "archive" / "2026-10.csv").exists()
 
 
 def test_headline_zone_label():

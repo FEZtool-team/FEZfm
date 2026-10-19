@@ -27,7 +27,8 @@ Monitor workflow, GitHub Actions (every 30 min)
   │                    merge reports of the same quake (45 s, 80 km, 1 magnitude unit)
   │                    tag fault zones, significant events, active sequences
   ├─ upload fezfm.duckdb back to the release
-  ├─ fezfm export      web/public/data: latest.json, feed.xml, CSV / GeoJSON / Parquet downloads
+  ├─ fezfm export      web/public/data: latest.json, feed.xml, CSV / GeoJSON / Parquet downloads,
+  │                    monthly archive (archive/YYYY-MM.json and .csv)
   └─ nuxt generate  →  GitHub Pages
 ```
 
@@ -149,6 +150,8 @@ This replaces the approximate traces and clears the "approximate" note on the si
 
 - Earthquake reports: IRSC (Institute of Geophysics, University of Tehran), USGS and EMSC.
 - Active faults: [GEM Global Active Faults Database](https://github.com/GEMScienceTools/gem-global-active-faults), CC BY-SA 4.0.
+- Plate boundaries: Bird (2003), [PB2002](https://github.com/fraxen/tectonicplates), ODC-BY 1.0.
+- Relief: [GEBCO Grid](https://www.gebco.net/) shaded relief, GEBCO Compilation Group; tiles built once by `collector/scripts/gebco_tiles.py`.
 - Country outlines: [Natural Earth](https://www.naturalearthdata.com/), public domain.
 
 FEZfm is a research tool, not an official earthquake warning service.
