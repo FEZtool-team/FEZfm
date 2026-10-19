@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 import httpx
 
 from ..model import IRAN_REGION, WORLD_MIN_MAG, Report
-from . import iso
+from . import get, iso
 
 NAME = "usgs"
 URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"
@@ -46,7 +46,7 @@ def parse(payload: dict) -> list[Report]:
 
 
 def _query(client: httpx.Client, params: dict) -> list[Report]:
-    r = client.get(URL, params={"format": "geojson", "orderby": "time-asc", "limit": 20000, **params})
+    r = get(client, URL, {"format": "geojson", "orderby": "time-asc", "limit": 20000, **params})
     if r.status_code == 204:
         return []
     r.raise_for_status()

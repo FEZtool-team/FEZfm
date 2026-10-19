@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import httpx
 import pytest
 
 from fezfm import db, dedupe, export, faults, feed, pipeline
@@ -229,3 +230,24 @@ def test_irsc_is_off_by_default():
 
     assert "irsc" not in model.SOURCES
     assert "irsc" in pipeline.SOURCE_MODULES
+
+
+def test_gateway_errors_are_retried():
+    from fezfm.sources import get
+
+    statuses = iter([502, 504, 200])
+    seen = []
+
+    def handler(request):
+        seen.append(request.url.params["q"])
+        return httpx.Response(next(statuses))
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    assert get(client, "https://example.org/", {"q": "x"}, waits=(0, 0)).status_code == 200
+    assert len(seen) == 3
+
+    statuses = iter([502, 502, 502])
+    assert get(client, "https://example.org/", {"q": "x"}, waits=(0, 0)).status_code == 502  # gives up after 3 tries
+
+    statuses = iter([400])
+    assert get(client, "https://example.org/", {"q": "x"}, waits=(0, 0)).status_code == 400  # not retried
