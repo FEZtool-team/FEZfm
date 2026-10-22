@@ -84,7 +84,7 @@ jobs:
         working-directory: web
         run: |
           npm ci
-          NUXT_APP_BASE_URL="/${GITHUB_REPOSITORY#*/}/" \
+          NUXT_APP_BASE_URL="/" \
           NUXT_PUBLIC_REPO_URL="https://github.com/${GITHUB_REPOSITORY}" \
           npm run generate
 
