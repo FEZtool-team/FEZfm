@@ -1,15 +1,10 @@
 <template>
   <nav class="glass fixed inset-x-0 top-0 z-40 border-x-0 border-t-0" aria-label="Main">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-gutter">
-      <div class="flex items-center gap-3">
-        <a :href="homeUrl" class="shrink-0" aria-label="FEZtool home">
-          <BaseLogo variant="mark" class="h-7 w-auto" />
-        </a>
-        <NuxtLink to="/" class="flex items-center gap-2">
-          <ToolsToolBadge size="sm" />
-          <span class="text-sm text-fez-100">Earthquake monitor</span>
-        </NuxtLink>
-      </div>
+      <NuxtLink to="/" class="flex shrink-0 items-center gap-3" aria-label="FEZfm earthquake monitor">
+        <BaseLogo variant="horizontal" lettering="fezfm" class="h-[22px] w-auto" />
+        <span class="hidden border-l border-glass-strong pl-3 text-sm text-fez-400 lg:inline">Earthquake monitor</span>
+      </NuxtLink>
 
       <ul class="hidden items-center gap-7 text-sm text-fez-400 md:flex">
         <li v-for="link in links" :key="link.to">
@@ -47,7 +42,6 @@
 import MenuIcon from "~icons/material-symbols-light/menu-rounded";
 import CloseIcon from "~icons/material-symbols-light/close-rounded";
 
-const homeUrl = useRuntimeConfig().public.homeUrl;
 const links = [
   { label: "Feed", to: "/" },
   { label: "Map", to: "/map" },
