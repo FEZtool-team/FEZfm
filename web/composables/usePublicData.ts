@@ -6,7 +6,7 @@
 export const usePublicData = <T, R = T>(key: string, file: string, pick: (raw: T) => R = (raw) => raw as unknown as R) => {
   // Read before the handler awaits anything, while the Nuxt context is set.
   const cfg = useRuntimeConfig();
-  const dataDir = cfg.dataDir as string;
+  const dataDir = import.meta.server ? (cfg.dataDir as string) : "";
   const base = cfg.app.baseURL;
 
   return useAsyncData(key, async () => {
