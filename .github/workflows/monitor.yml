@@ -68,10 +68,8 @@ jobs:
       - name: Export site data
         working-directory: collector
         run: |
-          owner="${GITHUB_REPOSITORY_OWNER,,}"
-          repo="${GITHUB_REPOSITORY#*/}"
           uv run fezfm export --out ../web/public/data \
-            --site-url "https://${owner}.github.io/${repo}/" \
+            --site-url "https://fezfm.feztool.com/" \
             --db-url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/fezfm.duckdb"
 
       - uses: actions/setup-node@v7

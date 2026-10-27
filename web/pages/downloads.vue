@@ -105,9 +105,20 @@ ORDER BY time_utc DESC LIMIT 20;</pre>
 </template>
 
 <script setup lang="ts">
+import { datasetBase, download, organization } from "~/data/schema";
+
 const base = useRuntimeConfig().app.baseURL;
-const counts = ref<Record<string, number> | null>(null);
-const dbUrl = ref<string | null>(null);
+const site = useRuntimeConfig().public.siteUrl;
+
+// Both files are written by the same export as the downloads, so the
+// prerendered counts match the files served next to this page.
+const { data: downloads } = await usePublicData<{ generated_at: string; counts: Record<string, number>; db_url: string | null }>(
+  "downloads",
+  "downloads.json"
+);
+const { data: archive } = await useArchiveIndex();
+const counts = computed(() => downloads.value?.counts ?? null);
+const dbUrl = computed(() => downloads.value?.db_url ?? null);
 
 const windows = [
   { key: "2h", label: "Last 2 hours" },
@@ -133,14 +144,32 @@ const columns = [
   ["sequence", "5 or more events within 25 km in the 6 hours up to this event."],
 ];
 
-onMounted(async () => {
-  try {
-    const r = await fetch(`${base}data/downloads.json?t=${Math.floor(Date.now() / 60e3)}`);
-    const d = await r.json();
-    counts.value = d.counts;
-    dbUrl.value = d.db_url;
-  } catch {}
+usePageSeo({
+  path: "/downloads/",
+  title: "Earthquake data downloads: CSV, GeoJSON, Parquet | FEZfm",
+  description:
+    "Earthquakes in Iran and worldwide for the last 2 hours to 30 days as CSV, GeoJSON or Parquet, plus an Atom feed, fault-zone layers and the full DuckDB database.",
 });
 
-useHead({ title: "FEZfm: data downloads" });
+const oldest = computed(() => archive.value?.months.at(-1)?.month);
+useJsonLd(() => [
+  organization,
+  {
+    "@type": "Dataset",
+    "@id": `${site}/downloads/#dataset`,
+    name: "FEZfm earthquake data, Iran and worldwide",
+    description:
+      "Earthquakes from USGS and EMSC reports, merged into one row per earthquake and rebuilt every 30 minutes. Every event in Iran and adjacent areas is kept; elsewhere M2.5 and above. Each row has its country, monitored fault zone, and significant and active-sequence flags.",
+    url: `${site}/downloads/`,
+    ...(downloads.value ? { dateModified: downloads.value.generated_at } : {}),
+    ...(oldest.value ? { temporalCoverage: `${oldest.value}-01/..` } : {}),
+    ...datasetBase(["usgs", "emsc", "irsc"]),
+    distribution: [
+      ...windows.flatMap((w) =>
+        formats.map((f) => download(`${site}/data/downloads/events_${w.key}.${f}`, `${w.label}, ${f.toUpperCase()}`))
+      ),
+      ...(dbUrl.value ? [download(dbUrl.value, "Full database, DuckDB")] : []),
+    ],
+  },
+]);
 </script>

@@ -1,6 +1,6 @@
 # FEZfm
 
-Fault and geohazard monitoring, part of [FEZtool](https://feztool-team.github.io/FEZhome/).
+Fault and geohazard monitoring, part of [FEZtool](https://feztool.com/). Live at **[fezfm.feztool.com](https://fezfm.feztool.com/)**; overview at [feztool.com/fezfm](https://feztool.com/fezfm/).
 
 FEZfm v1 is an earthquake monitor. Every 30 minutes it collects reports from USGS and EMSC, merges them, stores them in DuckDB, and publishes a feed, a map and downloadable data to GitHub Pages. It needs no server.
 
@@ -65,7 +65,7 @@ npm run dev                         # http://localhost:3036
 
 1. Push to `main` on GitHub. The repository must be public for free, unlimited Actions minutes.
 2. Under **Settings → Pages**, set **Source** to **GitHub Actions**.
-3. Under **Actions → Monitor**, choose **Run workflow**. The first run backfills 30 days, creates the `data-latest` release and deploys the site to `https://<owner>.github.io/FEZfm/`.
+3. Under **Actions → Monitor**, choose **Run workflow**. The first run backfills 30 days, creates the `data-latest` release and deploys the site. It is served at the custom domain set under **Settings → Pages**, https://fezfm.feztool.com/, which is also the `--site-url` the workflow gives `fezfm export` for the Atom feed.
 
 After that the schedule runs every 30 minutes. GitHub pauses schedules in repositories with no activity for 60 days; the workflow re-enables itself on each run to prevent that.
 

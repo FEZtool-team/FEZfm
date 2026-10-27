@@ -59,7 +59,7 @@
     <h2 class="mt-10 text-xl font-semibold text-fez-100">Limits</h2>
     <ul class="paragraph mt-4 list-disc space-y-2 pl-5 text-sm">
       <li>Delay: data are 30 to 45 minutes behind real time, and GitHub can delay scheduled runs further. Use official agencies for warnings.</li>
-      <li v-if="latest?.zones_approximate !== false">
+      <li v-if="meta?.zonesApproximate !== false">
         Fault zone traces are approximate. Faultiuo's original traces live in KML files that are not yet published;
         FEZfm draws each zone from published fault locations and will switch to the original traces when they are added.
       </li>
@@ -78,6 +78,36 @@
 </template>
 
 <script setup lang="ts">
-const { latest } = useQuakes();
-useHead({ title: "FEZfm: sources and method" });
+import type { Latest } from "~/composables/useQuakes";
+import { datasetBase, download, organization } from "~/data/schema";
+
+const { data: meta } = await usePublicData("latest-meta", "latest.json", (d: Latest) => ({
+  generatedAt: d.generated_at,
+  zonesApproximate: d.zones_approximate,
+}));
+
+const site = useRuntimeConfig().public.siteUrl;
+usePageSeo({
+  path: "/about/",
+  title: "Sources and method: how FEZfm merges earthquake reports | FEZfm",
+  description:
+    "How FEZfm merges USGS and EMSC earthquake reports every 30 minutes, tags fault zones in Iran and flags significant events and active sequences.",
+});
+useJsonLd(() => [
+  organization,
+  {
+    "@type": "DataFeed",
+    "@id": `${site}/about/#feed`,
+    name: "FEZfm earthquake feed",
+    description:
+      "The last 7 days of earthquakes in Iran and worldwide, merged from USGS and EMSC reports and rebuilt every 30 minutes, with fault-zone, significant and active-sequence flags.",
+    url: `${site}/`,
+    ...(meta.value ? { dateModified: meta.value.generatedAt } : {}),
+    ...datasetBase(),
+    distribution: [
+      download(`${site}/data/latest.json`, "Last 7 days, as used by this site, with source status"),
+      download(`${site}/data/feed.xml`, "Atom feed: significant events, active sequences and M3.5+ in the Iran region"),
+    ],
+  },
+]);
 </script>

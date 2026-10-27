@@ -24,9 +24,9 @@
 
     <p class="mt-3 text-xs text-fez-400">
       <template v-if="error">The archive could not be loaded ({{ error }}).</template>
-      <template v-else-if="loading">Loading {{ monthLabel(month) }}…</template>
-      <template v-else-if="month">{{ shownEvents.length }} of {{ events.length }} events in {{ monthLabel(month) }} match these filters.</template>
-      <template v-else>No archived months yet.</template>
+      <template v-else-if="!months.length">No archived months yet.</template>
+      <template v-else-if="loading || !month">Loading {{ monthLabel(month || months[0].month) }}…</template>
+      <template v-else>{{ shownEvents.length }} of {{ events.length }} events in {{ monthLabel(month) }} match these filters.</template>
     </p>
 
     <ClientOnly>
@@ -83,24 +83,40 @@
         </div>
       </div>
     </section>
+
+    <section class="mt-10" aria-labelledby="archive-months">
+      <h2 id="archive-months" class="text-lg font-semibold text-fez-100">Monthly summaries</h2>
+      <p class="paragraph mt-1 text-sm">The largest events, significant events and events in Iran and adjacent areas for each month.</p>
+      <ul class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <li v-for="m in months" :key="m.month">
+          <NuxtLink
+            :to="`/archive/${m.month}/`"
+            class="block rounded-lg border border-glass p-4 transition-colors hover:border-glass-strong hover:bg-fez-800/50"
+          >
+            <span class="font-medium text-fez-50">Earthquakes in {{ monthLabel(m.month) }}</span>
+            <span class="mt-1 block text-xs tabular-nums text-fez-400">
+              {{ m.events.toLocaleString("en-GB") }} events, {{ m.region.toLocaleString("en-GB") }} in the Iran region,
+              {{ m.significant.toLocaleString("en-GB") }} significant
+            </span>
+          </NuxtLink>
+        </li>
+      </ul>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Quake } from "~/composables/useQuakes";
-
-interface MonthInfo {
-  month: string;
-  events: number;
-  region: number;
-  significant: number;
-}
+import { organization, ORGANIZATION_ID } from "~/data/schema";
 
 const STEP = 100;
 const base = useRuntimeConfig().app.baseURL;
+const route = useRoute();
 const { matches } = useQuakes();
 
-const months = ref<MonthInfo[]>([]);
+// The month list is prerendered, so the month links are in the HTML.
+const { data: index } = await useArchiveIndex();
+const months = computed(() => index.value?.months ?? []);
 const month = ref("");
 const events = ref<Quake[]>([]);
 const loading = ref(false);
@@ -111,9 +127,6 @@ const limit = ref(STEP);
 const shownEvents = computed(() => events.value.filter(matches));
 const rows = computed(() => shownEvents.value.slice(0, limit.value));
 watch(shownEvents, () => (limit.value = STEP));
-
-const monthLabel = (m: string) =>
-  m ? new Date(`${m}-01T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }) : "";
 
 const getJson = async (path: string) => {
   const r = await fetch(`${base}data/archive/${path}?t=${Math.floor(Date.now() / 60e3)}`);
@@ -136,13 +149,14 @@ watch(month, async (m) => {
   }
 });
 
-onMounted(async () => {
-  try {
-    months.value = (await getJson("index.json")).months;
-    month.value = months.value[0]?.month ?? "";
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : String(e);
+onMounted(() => {
+  if (!index.value) {
+    error.value = "no archive index";
+    return;
   }
+  // ?month=YYYY-MM opens that month (links from the month pages).
+  const asked = String(route.query.month ?? "");
+  month.value = months.value.some((m) => m.month === asked) ? asked : (months.value[0]?.month ?? "");
 });
 
 const select = (id: string, fromList = false) => {
@@ -154,5 +168,23 @@ const select = (id: string, fromList = false) => {
   nextTick(() => document.querySelector('tr[aria-current="true"]')?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
 };
 
-useHead({ title: "FEZfm: earthquake archive" });
+const site = useRuntimeConfig().public.siteUrl;
+usePageSeo({
+  path: "/archive/",
+  title: "Earthquake archive by month, Iran and worldwide | FEZfm",
+  description:
+    "Every earthquake FEZfm has stored, one calendar month (UTC) at a time: a map, filters, monthly summaries and CSV downloads for Iran and worldwide.",
+});
+useJsonLd(() => [
+  organization,
+  {
+    "@type": "DataCatalog",
+    "@id": `${site}/archive/#catalog`,
+    name: "FEZfm earthquake archive",
+    description: "Every merged earthquake FEZfm has stored, one dataset per calendar month (UTC).",
+    url: `${site}/archive/`,
+    publisher: { "@id": ORGANIZATION_ID },
+    dataset: months.value.map((m) => ({ "@id": `${site}/archive/${m.month}/#dataset` })),
+  },
+]);
 </script>

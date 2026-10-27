@@ -11,7 +11,7 @@ from . import db, export, faults, pipeline
 
 DEFAULT_DB = "fezfm.duckdb"
 DEFAULT_OUT = "../web/public/data"
-DEFAULT_SITE = "https://feztool-team.github.io/FEZfm/"
+DEFAULT_SITE = "https://fezfm.feztool.com/"
 
 
 def main(argv: list[str] | None = None) -> None:

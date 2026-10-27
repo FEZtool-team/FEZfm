@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-7xl px-gutter py-8">
     <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-fez-50 sm:text-4xl">Recent earthquakes</h1>
+        <h1 class="text-3xl font-bold text-fez-50 sm:text-4xl">Recent earthquakes in Iran and worldwide</h1>
         <p class="paragraph mt-2 max-w-2xl text-sm">
           Reports from USGS and EMSC, merged into one feed and refreshed every 30 minutes. All events in Iran and adjacent areas; elsewhere M{{ latest?.world_min_mag ?? 2.5 }} and above.
         </p>
@@ -61,6 +61,9 @@
 </template>
 
 <script setup lang="ts">
+import { organization, website } from "~/data/schema";
+
+await usePrerenderedLatest();
 const { latest, filtered, now, win, country, minMag, depth, flag, source, selected } = useQuakes();
 // Cards are added a page at a time as the panel is scrolled, so a 7-day
 // window with thousands of events stays fast.
@@ -84,5 +87,11 @@ const select = (id: string) => {
   nextTick(() => document.querySelector('[aria-current="true"]')?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
 };
 
-useHead({ title: "FEZfm: recent earthquakes" });
+usePageSeo({
+  path: "/",
+  title: "Recent earthquakes in Iran and worldwide | FEZfm",
+  description:
+    "Recent earthquakes in Iran and worldwide: USGS and EMSC reports merged every 30 minutes, with a map, fault-zone tags and CSV, GeoJSON and Parquet downloads.",
+});
+useJsonLd([organization, website(useRuntimeConfig().public.siteUrl)]);
 </script>
