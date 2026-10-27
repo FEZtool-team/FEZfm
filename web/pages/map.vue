@@ -14,5 +14,10 @@
 
 <script setup lang="ts">
 const { filtered, selected } = useQuakes();
-useHead({ title: "FEZfm: earthquake map" });
+usePageSeo({
+  path: "/map/",
+  title: "Earthquake map of Iran and the world | FEZfm",
+  description:
+    "Map of recent earthquakes from USGS and EMSC with Iran's monitored fault zones, active faults and plate boundaries. Filter by magnitude, depth and country.",
+});
 </script>

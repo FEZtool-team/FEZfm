@@ -1,9 +1,27 @@
-// Served from a sub-path on GitHub Pages (/FEZfm/), from / everywhere else.
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+// Served from the root of fezfm.feztool.com. A sub-path build sets NUXT_APP_BASE_URL.
 const baseURL = process.env.NUXT_APP_BASE_URL || "/";
 
+// Absolute origin for canonical URLs, Open Graph images, JSON-LD and the sitemap.
+const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL || "https://fezfm.feztool.com").replace(/\/$/, "");
+
+// Files written by `fezfm export`. Pages read them while prerendering, so the
+// HTML carries real events instead of a loading state.
+const dataDir = fileURLToPath(new URL("./public/data", import.meta.url));
+
+/** Month routes from the archive index, if the collector has exported one. */
+const archiveRoutes = () => {
+  try {
+    const index = JSON.parse(readFileSync(`${dataDir}/archive/index.json`, "utf8"));
+    return index.months.map((m: { month: string }) => `/archive/${m.month}/`);
+  } catch {
+    return [];
+  }
+};
+
 const siteTitle = "FEZfm: earthquake and fault-zone monitor";
-const siteDescription =
-  "FEZfm collects earthquake reports from USGS and EMSC every 30 minutes and shows what happened in Iran and worldwide, with downloadable data.";
 
 // Tailwind color scale backed by the RGB-channel CSS variables in main.css.
 const scale = (name: string, steps: number[]) =>
@@ -26,15 +44,8 @@ export default defineNuxtConfig({
     head: {
       title: siteTitle,
       htmlAttrs: { lang: "en" },
-      meta: [
-        { name: "description", content: siteDescription },
-        { property: "og:type", content: "website" },
-        { property: "og:site_name", content: "FEZtool" },
-        { property: "og:title", content: siteTitle },
-        { property: "og:description", content: siteDescription },
-        { property: "og:image", content: `${baseURL}icon-512.png` },
-        { name: "twitter:card", content: "summary" },
-      ],
+      // Description, canonical, Open Graph and Twitter tags are set per page (usePageSeo).
+      meta: [{ property: "og:site_name", content: "FEZfm" }],
       script: [{ innerHTML: themeScript, tagPosition: "head" }],
       link: [
         { rel: "icon", type: "image/svg+xml", href: `${baseURL}favicon.svg` },
@@ -47,10 +58,19 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    dataDir,
     public: {
+      siteUrl,
       repoUrl: process.env.NUXT_PUBLIC_REPO_URL || "https://github.com/FEZtool-team/FEZfm",
-      homeUrl: "https://feztool-team.github.io/FEZhome/",
+      homeUrl: "https://feztool.com/",
+      toolUrl: "https://feztool.com/fezfm/",
+      docsUrl: "https://feztool-team.github.io/FEZdocs/",
     },
+  },
+
+  experimental: {
+    // GitHub Pages serves /archive/ and redirects /archive to it, so link to the slash form.
+    defaults: { nuxtLink: { trailingSlash: "append" } },
   },
 
   css: ["leaflet/dist/leaflet.css", "~/assets/css/main.css"],
@@ -115,9 +135,10 @@ export default defineNuxtConfig({
     preset: "github-pages",
     prerender: {
       crawlLinks: true,
-      routes: ["/", "/map", "/archive", "/downloads", "/about"],
+      routes: ["/", "/map/", "/archive/", "/downloads/", "/about/", "/sitemap.xml", ...archiveRoutes()],
       // Data files are copied from public/ as-is; the crawler must not treat them as pages.
-      ignore: ["/data/", "/layers/", "/FEZfm/data/", "/FEZfm/layers/"],
+      // Month pages link to /archive/?month=…, which is the same page as /archive/.
+      ignore: ["/data/", "/layers/", "/FEZfm/data/", "/FEZfm/layers/", "/archive/?"],
     },
   },
 

@@ -1,7 +1,7 @@
 {
   "name": "FEZfm earthquake monitor",
   "short_name": "FEZfm",
-  "description": "Earthquakes in Iran and worldwide, from IRSC, USGS and EMSC.",
+  "description": "Earthquakes in Iran and worldwide, from USGS and EMSC reports merged every 30 minutes.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#212529",

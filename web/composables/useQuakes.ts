@@ -111,7 +111,11 @@ export const useQuakes = () => {
   };
 
   onMounted(() => {
-    if (!latest.value) load();
+    // First mount: replace the prerendered snapshot (if any) with the current file.
+    if (!timer) {
+      now.value = Date.now();
+      load();
+    }
     timer ??= setInterval(load, REFRESH_MS);
     clock ??= setInterval(() => (now.value = Date.now()), 30e3);
   });
@@ -138,6 +142,20 @@ export const useQuakes = () => {
   };
 
   return { latest, error, now, win, country, minMag, depth, flag, source, selected, filtered, matches, load };
+};
+
+/**
+ * Puts the last 24 hours of data/latest.json into the feed while prerendering,
+ * so the HTML lists real events and counts. The client loads the full 7 days
+ * on mount.
+ */
+export const usePrerenderedLatest = async () => {
+  const latest = useState<Latest | null>("latest", () => null);
+  const { data } = await usePublicData("latest-24h", "latest.json", (d: Latest) => {
+    const since = Date.parse(d.generated_at) - WINDOWS["24h"].ms;
+    return { ...d, events: d.events.filter((q) => Date.parse(q.t) >= since) };
+  });
+  latest.value ??= data.value;
 };
 
 /** "12 min ago", "3 h ago", "2 d ago". */
